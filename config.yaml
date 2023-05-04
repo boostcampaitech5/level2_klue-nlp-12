@@ -1,0 +1,91 @@
+---
+name: exp-name
+n_gpu: 1
+use_wandb: true
+arch:
+  type: klue/bert-base
+dataloader:
+  type: STSDataModule
+  args:
+    batch_size: 16
+    shuffle: true
+    revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
+    num_workers: -1
+    k_fold:
+      enabled: false
+      k: 5
+optimizer:
+  type: AdamW
+  args:
+    lr: 5.0e-05
+    weight_decay: 0.01
+    amsgrad: true
+loss:
+  type: SmoothL1Loss
+  args:
+    bce: false
+    beta: 0.5
+metrics:
+- val_pearson
+lr_scheduler:
+  type: StepLR
+  args:
+    warmup_steps: 500
+    step_size: 50
+    gamma: 0.1
+  is_schedule: false
+trainer:
+  epochs: 1
+  output_dir: saved/models/
+  logging_dir: "./logs"
+  logging_steps: 100
+  save_total_limit: 5
+  save_steps: 500
+  save_freq: 1
+  monitor: max val_pearson
+  early_stop: 3
+  evaluation_strategy: steps
+  evaluation_steps: 500
+  model_dir: "./best_model"
+wandb:
+  entity: salmons
+  project_name: klue-re
+  sweep_project_name: sweep
+  sweep_count: 10
+sweep_config:
+  method: bayes
+  metric:
+    name: val_pearson
+    goal: maximize
+  parameters:
+    lr:
+      values:
+      - 3.0e-06
+      - 5.0e-06
+      - 7.0e-06
+      - 1.0e-05
+      - 2.0e-05
+      - 3.0e-05
+      - 5.0e-05
+    epochs:
+      values:
+      - 4
+      - 5
+      - 6
+      - 7
+    batch_size:
+      values:
+      - 16
+    loss_function:
+      values:
+      - SmoothL1Loss
+    beta:
+      values:
+      - 0.1
+      - 0.5
+      - 1
+      - 2
+      - 5
+    optimizer:
+      values:
+      - AdamW

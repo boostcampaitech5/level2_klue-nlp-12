@@ -1,0 +1,8 @@
+__pycache__/
+best_model/
+logs/
+prediction/
+result/
+saved/
+wandb/
+.DS_Store
