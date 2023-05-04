@@ -1,0 +1,16 @@
+[tool.black]
+line-length = 88
+target-version = ['py37','py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+  \.git
+  | _build
+  | best_model
+  | logs
+  | prediction
+  | results
+  | saved
+  | wandb
+)/
+'''

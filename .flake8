@@ -1,0 +1,26 @@
+[flake8]
+max-line-length = 88
+
+exclude =
+    .git,
+    __pycache__,
+    best_model,
+    logs,
+    prediction,
+    results,
+    saved,
+    wandb,
+    .gitignore
+
+ignore =
+    E203,
+    E266,
+    E501,
+    W503,
+    F401,
+    F403,
+    F405,
+    F821,
+    F841
+
+count = True
