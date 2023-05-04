@@ -2,7 +2,7 @@ __pycache__/
 best_model/
 logs/
 prediction/
-result/
+results/
 saved/
 wandb/
 .DS_Store
