@@ -7,3 +7,5 @@ saved/
 wandb/
 .DS_Store
 EDA.ipynb
+config*.yaml
+!config.yaml
