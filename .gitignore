@@ -6,3 +6,4 @@ results/
 saved/
 wandb/
 .DS_Store
+EDA.ipynb
