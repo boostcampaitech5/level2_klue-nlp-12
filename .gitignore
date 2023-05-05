@@ -1,9 +1,13 @@
+.DS_Store
+.venv
+
 __pycache__/
+
 best_model/
 logs/
 prediction/
 results/
 saved/
 wandb/
-.DS_Store
+
 EDA.ipynb
