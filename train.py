@@ -8,6 +8,7 @@ from transformers import (
     AutoTokenizer,
     AutoConfig,
     AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
     RobertaConfig,
@@ -91,7 +92,8 @@ def train(config):
         train_dataset=re_train_dataset,  # training dataset
         eval_dataset=re_dev_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
-        callbacks=([WandbCallback()] if config.use_wandb else []),
+        # callbacks=([WandbCallback()] if config.use_wandb else []),
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer["early_stop"])],
     )
 
     # 9. train model
