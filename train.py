@@ -71,8 +71,10 @@ def train(config):
         learning_rate=config.optimizer["lr"],  # learning_rate
         per_device_train_batch_size=config.dataloader["batch_size"],  # batch size per device during training
         per_device_eval_batch_size=config.dataloader["batch_size"],  # batch size for evaluation
-        warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
+        # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
+        warmup_ratio=config.trainer['warmup_ratio'],
         weight_decay=config.optimizer["weight_decay"],  # strength of weight decay
+        adam_beta2=config.optimizer["adam_beta2"],  # the beta2 hyperparameter for the [`AdamW`] optimizer.
         logging_dir=config.trainer["logging_dir"],  # directory for storing logs
         logging_steps=config.trainer["logging_steps"],  # log saving step.
         evaluation_strategy=config.trainer["evaluation_strategy"],  # evaluation strategy to adopt during training
