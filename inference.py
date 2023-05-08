@@ -82,7 +82,7 @@ def main(config):
     model.to(device)
 
     # load test dataset
-    revision = config.dataloader["args"]["revision"]
+    revision = config.dataloader["revision"]
     test_id, test_dataset, test_label = load_test_dataset("test", revision, tokenizer)
     Re_test_dataset = RE_Dataset(test_dataset, test_label)
 
