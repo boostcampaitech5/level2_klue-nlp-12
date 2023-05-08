@@ -33,8 +33,8 @@ def train(config):
     # 3. tokenize dataset
     revision = config.dataloader["revision"]
 
-    train_dataset, train_raw_label = load_train_dataset("train[:80%]", revision, tokenizer)
-    dev_dataset, dev_raw_label = load_train_dataset("train[80%:]", revision, tokenizer)  # validation용 데이터는 따로 만드셔야 합니다.
+    train_dataset, train_raw_label = load_train_dataset("train", revision, tokenizer)
+    dev_dataset, dev_raw_label = load_train_dataset("validation", revision, tokenizer)  # validation용 데이터는 따로 만드셔야 합니다.
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)
@@ -78,6 +78,7 @@ def train(config):
         logging_dir=config.trainer["logging_dir"],  # directory for storing logs
         logging_steps=config.trainer["logging_steps"],  # log saving step.
         evaluation_strategy=config.trainer["evaluation_strategy"],  # evaluation strategy to adopt during training
+        save_strategy=config.trainer["save_strategy"],
         # `no`: No evaluation during training.
         # `steps`: Evaluate every `eval_steps`.
         # `epoch`: Evaluate every end of epoch.
