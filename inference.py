@@ -101,7 +101,7 @@ def main(config):
             "probs": output_prob,
         }
     )
-    output_path = "./prediction/submission.csv"
+    output_path = config.pred_path
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     output.to_csv(output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
 
