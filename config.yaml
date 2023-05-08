@@ -1,6 +1,7 @@
 ---
 name: exp-name
 n_gpu: 1
+seed: 420
 use_wandb: true
 arch:
   type: klue/bert-base
@@ -9,7 +10,7 @@ dataloader:
   batch_size: 16
   shuffle: true
   revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
-  num_workers: -1
+  num_workers: 0
   k_fold:
     enabled: false
     k: 5

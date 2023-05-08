@@ -1,14 +1,9 @@
-import os
 import torch
-import sklearn
-import numpy as np
-import pandas as pd
 import pickle as pickle
 from metric import *
 from load_data import *
+from utils import *
 from args import parse_arguments
-from datasets import load_dataset
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 from transformers import (
     AutoTokenizer,
     AutoConfig,
@@ -26,6 +21,8 @@ from wandb import AlertLevel
 
 
 def train(config):
+    seed_everything(config.seed)
+    
     # load model and tokenizer
     MODEL_NAME = config.arch["type"]
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)

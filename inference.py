@@ -1,11 +1,11 @@
 import torch
-import argparse
 import numpy as np
 import pandas as pd
 import pickle as pickle
 import torch.nn.functional as F
 from tqdm import tqdm
 from load_data import *
+from utils import *
 from args import parse_arguments
 from torch.utils.data import DataLoader
 from transformers import (
@@ -18,6 +18,7 @@ from transformers import (
 
 
 def inference(model, tokenized_sent, device):
+    seed_everything(config.seed)
     """
     test dataset을 DataLoader로 만들어 준 후,
     batch_size로 나눠 model이 예측 합니다.
