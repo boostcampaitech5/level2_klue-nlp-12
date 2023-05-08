@@ -13,3 +13,5 @@ wandb/
 EDA.ipynb
 config*.yaml
 !config.yaml
+output*.log
+nohup*.log
