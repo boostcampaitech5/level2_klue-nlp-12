@@ -85,11 +85,11 @@ def main(config):
     # load test dataset
     revision = config.dataloader["revision"]
     test_id, test_dataset, test_label = load_test_dataset("test", revision, tokenizer)
-    Re_test_dataset = RE_Dataset(test_dataset, test_label)
+    re_test_dataset = RE_Dataset(test_dataset, test_label)
 
     # predict answer
     pred_answer, output_prob = inference(
-        model, Re_test_dataset, device
+        model, re_test_dataset, device
     )  # model에서 class 추론
     pred_answer = num_to_label(pred_answer)  # 숫자로 된 class를 원래 문자열 라벨로 변환
 
@@ -101,7 +101,7 @@ def main(config):
             "probs": output_prob,
         }
     )
-    output_path = './predictinon/submission.csv'
+    output_path = './prediction/submission.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     output.to_csv(output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
 

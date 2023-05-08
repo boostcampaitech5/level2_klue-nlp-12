@@ -39,8 +39,8 @@ def train(config):
     dev_label = label_to_num(dev_raw_label)
 
     # 4. make Dataset object
-    RE_train_dataset = RE_Dataset(train_dataset, train_label)
-    RE_dev_dataset = RE_Dataset(dev_dataset, dev_label)
+    re_train_dataset = RE_Dataset(train_dataset, train_label)
+    re_dev_dataset = RE_Dataset(dev_dataset, dev_label)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
@@ -88,8 +88,8 @@ def train(config):
     trainer = Trainer(
         model=model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
-        train_dataset=RE_train_dataset,  # training dataset
-        eval_dataset=RE_train_dataset,  # evaluation dataset
+        train_dataset=re_train_dataset,  # training dataset
+        eval_dataset=re_dev_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
         callbacks=([WandbCallback()] if config.use_wandb else []),
     )
