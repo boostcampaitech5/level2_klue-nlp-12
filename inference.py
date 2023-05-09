@@ -1,13 +1,12 @@
-import sys
 import torch
+import pickle as pickle
+from tqdm import tqdm
+import sys
+
 import numpy as np
 import pandas as pd
-import pickle as pickle
+import torch
 import torch.nn.functional as F
-from tqdm import tqdm
-from load_data import *
-from utils import *
-from args import parse_arguments
 from torch.utils.data import DataLoader
 from transformers import (
     AutoTokenizer,
@@ -17,13 +16,19 @@ from transformers import (
     TrainingArguments,
 )
 
+from utils import *
+from load_data import *
+from args import parse_arguments
+
 
 def inference(model, tokenized_sent, device):
-    seed_everything(config.seed)
     """
     test dataset을 DataLoader로 만들어 준 후,
     batch_size로 나눠 model이 예측 합니다.
     """
+
+    seed_everything(config.seed)
+    
     dataloader = DataLoader(tokenized_sent, batch_size=16, shuffle=False)
     model.eval()
 
@@ -56,6 +61,7 @@ def num_to_label(label):
     """
     숫자로 되어 있던 class를 원본 문자열 라벨로 변환 합니다.
     """
+
     origin_label = []
 
     with open("dict_num_to_label.pkl", "rb") as f:
@@ -71,6 +77,7 @@ def main(config):
     """
     주어진 dataset csv 파일과 같은 형태일 경우 inference 가능한 코드입니다.
     """
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # load tokenizer

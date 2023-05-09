@@ -1,7 +1,8 @@
 import os
+import pickle as pickle
+
 import torch
 import pandas as pd
-import pickle as pickle
 from datasets import load_dataset
 
 

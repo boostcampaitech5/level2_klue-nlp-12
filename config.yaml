@@ -21,7 +21,6 @@ optimizer:
   weight_decay: 0.01
   adam_beta2: 0.98
   amsgrad: true
-  adam_beta2: 0
 loss:
   type: SmoothL1Loss
   bce: false
