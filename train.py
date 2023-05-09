@@ -1,3 +1,4 @@
+import sys
 import torch
 import pickle as pickle
 from metric import *
@@ -144,7 +145,13 @@ def main(config):
 
 
 if __name__ == "__main__":
-    config = parse_arguments()
+    
+    try:
+        config_path = sys.argv[1]
+    except:
+        config_path = './config.yaml'
+        
+    config = parse_arguments(config_path)
 
     if config.use_wandb:
         run_name = "{}_{}_{}_{}_{}".format(
