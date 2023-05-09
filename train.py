@@ -25,6 +25,29 @@ import wandb
 from wandb import AlertLevel
 
 
+class CustomTrainer(Trainer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    def compute_loss(self, model, inputs, return_outputs= False):
+        device= torch.device('cuda:0' if torch.cuda.is_available else 'cpu:0')
+        labels= inputs.pop('labels')
+
+        # forward pass
+        outputs= model(**inputs)
+        
+        # 인덱스에 맞춰서 과거 ouput을 다 저장
+        if self.args.past_index >=0:
+            self._past= outputs[self.args.past_index]
+            
+        # compute custom loss
+        # custom loss function, 아래에서 이름을 바꾸면 다른 loss 도 사용가능
+        # 'lovasz_loss', 'focal_loss', 'smooth_L1_loss', 'default'
+        custom_loss = change_loss_function('focal_loss').to(device)
+        loss = custom_loss(outputs['logits'], labels)    
+        return (loss, outputs) if return_outputs else loss
+
+
 def train(config):
     # load model and tokenizer
     MODEL_NAME = config.arch["type"]
@@ -104,11 +127,11 @@ def train(config):
 
     # 7. trainer 설정
     # 8. evaluate 함수 설정
-    trainer = Trainer(
+    trainer = CustomTrainer(
         model=model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
         train_dataset=RE_train_dataset,  # training dataset
-        eval_dataset=RE_train_dataset,  # evaluation dataset
+        # eval_dataset=RE_train_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
         callbacks=([WandbCallback()] if config.use_wandb else []),
     )

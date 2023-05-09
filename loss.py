@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=2, reduction='mean'):
         super(FocalLoss, self).__init__()
@@ -20,11 +21,12 @@ class FocalLoss(nn.Module):
             return torch.sum(focal_loss)
         else:
             return focal_loss
-        
+
 
 class LovaszSoftmaxLoss(nn.Module):
-    def __init__(self, reduction='mean'):
+    def __init__(self, weight=None, reduction='mean'):
         super(LovaszSoftmaxLoss, self).__init__()
+        self.weight = weight
         self.reduction = reduction
 
     def lovasz_grad(self, true_sorted):
@@ -37,22 +39,22 @@ class LovaszSoftmaxLoss(nn.Module):
             jaccard[1:p] = jaccard[1:p] - jaccard[0:-1]
         return jaccard
 
-    def lovasz_softmax(self, probas, labels):
-        C = probas.shape[1]
+    def lovasz_softmax(self, log_probs, labels):
+        C = log_probs.shape[1]
         losses = []
         for c in range(C):
             fg = (labels == c).float()  # foreground for class c
             if fg.sum() == 0:
                 continue
-            errors = (fg - probas[:, c]).abs()
+            errors = (fg - log_probs[:, c]).abs()
             errors_sorted, perm = torch.sort(errors, 0, descending=True)
             fg_sorted = fg[perm]
             losses.append(torch.dot(errors_sorted, self.lovasz_grad(fg_sorted)))
         return torch.stack(losses)
 
     def forward(self, inputs, targets):
-        probas = F.softmax(inputs, dim=1)
-        lovasz_loss = self.lovasz_softmax(probas, targets)
+        log_probs = F.log_softmax(inputs, dim=1)
+        lovasz_loss = self.lovasz_softmax(log_probs, targets)
 
         if self.reduction == 'mean':
             return torch.mean(lovasz_loss)
@@ -62,3 +64,11 @@ class LovaszSoftmaxLoss(nn.Module):
             return lovasz_loss
 
 
+loss_function = {'lovasz_loss': LovaszSoftmaxLoss, 
+                 'focal_loss': FocalLoss, 
+                 'smooth_L1_loss' : torch.nn.SmoothL1Loss,
+                 'default' : torch.nn.CrossEntropyLoss}
+
+def change_loss_function(loss_function_name, **kwargs):
+    choose_loss_function = loss_function[loss_function_name]
+    return choose_loss_function(**kwargs)
