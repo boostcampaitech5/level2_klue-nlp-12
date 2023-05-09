@@ -1,22 +1,22 @@
 #!/bin/bash
 
-configs=("configs/config_exp1.yaml" "configs/config_exp2.yaml")
-index=2
+configs=("configs/config_exp.yaml")
+index=0
 
 for config in "${configs[@]}"; do
   let index++
-  log_filename="output_exp_${index}.log"
+  log_filename="output_logs/output_exp_${index}.log"
 
   echo "Starting training with ${config}..."
 
-  cp ${config} config_exp.yaml
-  nohup python3 train.py > "${log_filename}" 2>&1 &
+  nohup python3 train.py ${config} > "${log_filename}" 2>&1 &
   wait $!
 
   echo "Training with ${config} has completed."
 
-  nohup python3 inference.py > "${log_filename}" 2>&1 &
+  nohup python3 inference.py ${config} > "${log_filename}" 2>&1 &
   wait $!
+
   echo "Inferencing with ${config} has completed."
 done
 
