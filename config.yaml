@@ -3,7 +3,6 @@ name: exp-name
 n_gpu: 1
 seed: 420
 use_wandb: true
-pred_path: ./prediction/submission_exp6.csv
 arch:
   type: klue/roberta-large
 dataloader:
@@ -19,7 +18,7 @@ optimizer:
   type: AdamW
   lr: 2.e-5
   weight_decay: 0.01
-  adam_beta2: 0.98
+  adam_beta2: 0.999
   amsgrad: true
 loss:
   type: SmoothL1Loss
@@ -28,7 +27,7 @@ loss:
 lr_scheduler:
   type: StepLR
   warmup_steps: 500
-  warmup_ratio: 0.2
+  warmup_ratio: 0.06
   step_size: 50
   gamma: 0.1
   is_schedule: false
@@ -49,7 +48,7 @@ trainer:
   save_strategy: steps
 wandb:
   entity: salmons
-  project_name: klue-re-gt
+  project_name: klue-re
   sweep_project_name: sweep
   sweep_count: 10
 sweep_config:
