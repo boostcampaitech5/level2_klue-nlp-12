@@ -4,6 +4,7 @@ from metric import *
 from load_data import *
 from utils import *
 from args import parse_arguments
+from loss import *
 from transformers import (
     AutoTokenizer,
     AutoConfig,
@@ -115,8 +116,8 @@ def train(config):
     trainer = CustomTrainer(
         model=model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
-        train_dataset=RE_train_dataset,  # training dataset
-        eval_dataset=RE_train_dataset,  # evaluation dataset
+        train_dataset=re_train_dataset,  # training dataset
+        eval_dataset=re_dev_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
         # callbacks=([WandbCallback()] if config.use_wandb else []),
         callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer["early_stop"])],
