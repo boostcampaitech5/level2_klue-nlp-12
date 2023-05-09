@@ -1,10 +1,12 @@
 import os
-import torch
 import random
 import logging
+
+import torch
 import numpy as np
 
 log = logging.getLogger(__name__)
+
 
 def seed_everything(seed, workers: bool = False) -> int:
     log.info(f"Global seed set to {seed}")

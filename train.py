@@ -1,12 +1,8 @@
 import sys
-import torch
 import pickle as pickle
-from loss import *
-from utils import *
-from metric import *
-from load_data import *
-from args import parse_arguments
-from loss import *
+
+import torch
+import wandb
 from transformers import (
     AutoTokenizer,
     AutoConfig,
@@ -19,9 +15,14 @@ from transformers import (
     RobertaForSequenceClassification,
     BertTokenizer,
 )
-import wandb
-from wandb import AlertLevel
 from transformers.integrations import WandbCallback
+from wandb import AlertLevel
+
+from loss import *
+from utils import *
+from metric import *
+from load_data import *
+from args import parse_arguments
 
 
 class CustomTrainer(Trainer):

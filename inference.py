@@ -1,12 +1,10 @@
-import torch
+import pickle as pickle
+from tqdm import tqdm
+
 import numpy as np
 import pandas as pd
-import pickle as pickle
+import torch
 import torch.nn.functional as F
-from tqdm import tqdm
-from load_data import *
-from utils import *
-from args import parse_arguments
 from torch.utils.data import DataLoader
 from transformers import (
     AutoTokenizer,
@@ -15,6 +13,10 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
+
+from utils import *
+from load_data import *
+from args import parse_arguments
 
 
 def inference(model, tokenized_sent, device):
