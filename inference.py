@@ -1,3 +1,4 @@
+import sys
 import torch
 import numpy as np
 import pandas as pd
@@ -133,5 +134,12 @@ def main(config):
 
 
 if __name__ == "__main__":
-    config = parse_arguments()
+
+    try:
+        config_path = sys.argv[1]
+    except:
+        config_path = './config.yaml'
+        
+    config = parse_arguments(config_path)
+
     main(config)

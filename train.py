@@ -42,7 +42,7 @@ class CustomTrainer(Trainer):
         # compute custom loss
         # custom loss function, 아래에서 이름을 바꾸면 다른 loss 도 사용가능
         # 'lovasz_loss', 'focal_loss', 'smooth_L1_loss', 'default'
-        custom_loss = change_loss_function('focal_loss').to(device)
+        custom_loss = change_loss_function('default').to(device)
         loss = custom_loss(outputs['logits'], labels)    
         return (loss, outputs) if return_outputs else loss
 
@@ -93,6 +93,7 @@ def train(config):
         # 기본 설정
         output_dir=config.trainer["output_dir"],  # 모델 저장 디렉토리
         report_to=("wandb" if config.use_wandb else "none"),  # wandb 사용 여부
+        fp16=True,
 
         # 학습 설정
         num_train_epochs=config.trainer["epochs"],  # 전체 훈련 epoch 수
