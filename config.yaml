@@ -21,7 +21,7 @@ optimizer:
   adam_beta2: 0.999
   amsgrad: true
 loss:
-  type: SmoothL1Loss
+  type: FocalLoss
   bce: false
   beta: 0.5
 lr_scheduler:

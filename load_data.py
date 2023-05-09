@@ -54,7 +54,6 @@ def load_test_dataset(split, revision, tokenizer):
     if split == "test":
         test_label = list(map(int, pd_dataset["label"].values))
     else:
-        #test_label = [100] * len(test_dataset["id"])
         test_label = pd_dataset["label"].values
 
     return test_dataset["id"], tokenized_test, test_label

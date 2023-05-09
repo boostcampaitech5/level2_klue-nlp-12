@@ -1,10 +1,10 @@
-import pickle as pickle
-from tqdm import tqdm
-
+import sys
+import torch
 import numpy as np
 import pandas as pd
-import torch
+import pickle as pickle
 import torch.nn.functional as F
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import (
     AutoTokenizer,
@@ -139,5 +139,12 @@ def main(config):
 
 
 if __name__ == "__main__":
-    config = parse_arguments()
+
+    try:
+        config_path = sys.argv[1]
+    except:
+        config_path = './config.yaml'
+        
+    config = parse_arguments(config_path)
+
     main(config)
