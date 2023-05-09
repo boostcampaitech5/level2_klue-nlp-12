@@ -6,7 +6,6 @@ use_wandb: true
 arch:
   type: klue/bert-base
 dataloader:
-  type: STSDataModule
   batch_size: 16
   shuffle: true
   revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
@@ -19,31 +18,33 @@ optimizer:
   lr: 5.0e-05
   weight_decay: 0.01
   amsgrad: true
+  adam_beta2: 0
 loss:
   type: SmoothL1Loss
   bce: false
   beta: 0.5
-metrics:
-- val_pearson
 lr_scheduler:
   type: StepLR
   warmup_steps: 500
+  warmup_ratio: 0.2
   step_size: 50
   gamma: 0.1
   is_schedule: false
 trainer:
-  epochs: 1
+  epochs: 5
   output_dir: saved/models/
-  logging_dir: "./logs"
+  model_dir: ./best_model
+  pred_dir: ./prediction/submission.csv
+  val_pred_dir: ./prediction/validation_output.csv
+  logging_dir: ./logs
   logging_steps: 100
   save_total_limit: 5
   save_steps: 500
   save_freq: 1
-  monitor: max val_pearson
   early_stop: 3
   evaluation_strategy: steps
   evaluation_steps: 500
-  model_dir: "./best_model"
+  save_strategy: steps
 wandb:
   entity: salmons
   project_name: klue-re

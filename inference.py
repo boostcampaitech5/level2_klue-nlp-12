@@ -101,7 +101,7 @@ def main(config):
             "probs": output_prob,
         }
     )
-    output_path = config.pred_path
+    output_path = config.trainer["pred_dir"]  
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     output.to_csv(output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
 
@@ -125,9 +125,9 @@ def main(config):
             "probs": val_output_prob,
         }
     )
-    val_output.to_csv(
-        "./prediction/validation_output.csv", index=False
-    )
+    val_output_path = config.trainer["val_pred_dir"]  
+    os.makedirs(os.path.dirname(val_output_path), exist_ok=True)
+    val_output.to_csv(val_output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
 
     print("---- Finish! ----")
 

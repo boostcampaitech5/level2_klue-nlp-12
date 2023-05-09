@@ -1,8 +1,9 @@
 import torch
 import pickle as pickle
+from loss import *
+from utils import *
 from metric import *
 from load_data import *
-from utils import *
 from args import parse_arguments
 from transformers import (
     AutoTokenizer,
@@ -16,9 +17,9 @@ from transformers import (
     RobertaForSequenceClassification,
     BertTokenizer,
 )
-from transformers.integrations import WandbCallback
 import wandb
 from wandb import AlertLevel
+from transformers.integrations import WandbCallback
 
 
 class CustomTrainer(Trainer):
@@ -57,7 +58,7 @@ def train(config):
     revision = config.dataloader["revision"]
 
     train_dataset, train_raw_label = load_train_dataset("train", revision, tokenizer)
-    dev_dataset, dev_raw_label = load_train_dataset("validation", revision, tokenizer)  # validation용 데이터는 따로 만드셔야 합니다.
+    dev_dataset, dev_raw_label = load_train_dataset("validation", revision, tokenizer)
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)
@@ -87,27 +88,37 @@ def train(config):
     ## 사용한 option 외에도 다양한 option들이 있습니다.
     ## https://huggingface.co/transformers/main_classes/trainer.html#trainingarguments 참고해주세요.
     training_args = TrainingArguments(
-        output_dir=config.trainer["output_dir"],  # output directory
-        save_total_limit=config.trainer["save_total_limit"],  # number of total save model
-        save_steps=config.trainer["save_steps"],  # model saving step
-        num_train_epochs=config.trainer["epochs"],  # total number of training epochs
-        learning_rate=config.optimizer["lr"],  # learning_rate
-        per_device_train_batch_size=config.dataloader["batch_size"],  # batch size per device during training
-        per_device_eval_batch_size=config.dataloader["batch_size"],  # batch size for evaluation
-        # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
-        warmup_ratio=config.trainer['warmup_ratio'],
-        weight_decay=config.optimizer["weight_decay"],  # strength of weight decay
-        adam_beta2=config.optimizer["adam_beta2"],  # the beta2 hyperparameter for the [`AdamW`] optimizer.
-        logging_dir=config.trainer["logging_dir"],  # directory for storing logs
-        logging_steps=config.trainer["logging_steps"],  # log saving step.
-        evaluation_strategy=config.trainer["evaluation_strategy"],  # evaluation strategy to adopt during training
+        # 기본 설정
+        output_dir=config.trainer["output_dir"],  # 모델 저장 디렉토리
+        report_to=("wandb" if config.use_wandb else "none"),  # wandb 사용 여부
+
+        # 학습 설정
+        num_train_epochs=config.trainer["epochs"],  # 전체 훈련 epoch 수
+        learning_rate=config.optimizer["lr"],  # learning rate
+        weight_decay=config.optimizer["weight_decay"],  # weight decay
+        adam_beta2=config.optimizer["adam_beta2"],  # AdamW 옵티마이저의 beta2 하이퍼파라미터
+
+        # 배치 사이즈 설정
+        per_device_train_batch_size=config.dataloader["batch_size"],  # 훈련 중 장치 당 batch size
+        per_device_eval_batch_size=config.dataloader["batch_size"],  # 평가 중 장치 당 batch size
+
+        # 스케줄링 설정
+        warmup_ratio=config.lr_scheduler['warmup_ratio'],  # learning rate scheduler의 warmup 비율
+            # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
+
+        # 로깅 설정
+        logging_dir=config.trainer["logging_dir"],  # 로그 저장 디렉토리
+        logging_steps=config.trainer["logging_steps"],  # 로그 저장 스텝
+
+        # 모델 저장 설정
+        save_total_limit=config.trainer["save_total_limit"],  # 전체 저장 모델 수 제한
+        save_steps=config.trainer["save_steps"],  # 모델 저장 스텝
         save_strategy=config.trainer["save_strategy"],
-        # `no`: No evaluation during training.
-        # `steps`: Evaluate every `eval_steps`.
-        # `epoch`: Evaluate every end of epoch.
-        eval_steps=config.trainer["evaluation_steps"],  # evaluation step
+
+        # 평가 설정
+        evaluation_strategy=config.trainer["evaluation_strategy"],  # 훈련 중 평가 전략
+        eval_steps=config.trainer["evaluation_steps"],  # 평가 스텝
         load_best_model_at_end=True,
-        report_to=("wandb" if config.use_wandb else "none"),  # integrations to report the results and logs to
     )
 
     # 7. trainer 설정
@@ -115,8 +126,8 @@ def train(config):
     trainer = CustomTrainer(
         model=model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
-        train_dataset=RE_train_dataset,  # training dataset
-        eval_dataset=RE_train_dataset,  # evaluation dataset
+        train_dataset=re_train_dataset,  # training dataset
+        eval_dataset=re_dev_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
         # callbacks=([WandbCallback()] if config.use_wandb else []),
         callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer["early_stop"])],
