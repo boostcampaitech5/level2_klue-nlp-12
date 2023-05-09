@@ -1,38 +1,35 @@
 ---
 name: exp-name
 n_gpu: 1
+seed: 420
 use_wandb: true
 arch:
   type: klue/bert-base
 dataloader:
   type: STSDataModule
-  args:
-    batch_size: 16
-    shuffle: true
-    revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
-    num_workers: -1
-    k_fold:
-      enabled: false
-      k: 5
+  batch_size: 16
+  shuffle: true
+  revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
+  num_workers: 0
+  k_fold:
+    enabled: false
+    k: 5
 optimizer:
   type: AdamW
-  args:
-    lr: 5.0e-05
-    weight_decay: 0.01
-    amsgrad: true
+  lr: 5.0e-05
+  weight_decay: 0.01
+  amsgrad: true
 loss:
   type: SmoothL1Loss
-  args:
-    bce: false
-    beta: 0.5
+  bce: false
+  beta: 0.5
 metrics:
 - val_pearson
 lr_scheduler:
   type: StepLR
-  args:
-    warmup_steps: 500
-    step_size: 50
-    gamma: 0.1
+  warmup_steps: 500
+  step_size: 50
+  gamma: 0.1
   is_schedule: false
 trainer:
   epochs: 1

@@ -1,18 +1,14 @@
-import os
 import torch
-import sklearn
-import numpy as np
-import pandas as pd
 import pickle as pickle
 from metric import *
 from load_data import *
+from utils import *
 from args import parse_arguments
-from datasets import load_dataset
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 from transformers import (
     AutoTokenizer,
     AutoConfig,
     AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
     RobertaConfig,
@@ -49,6 +45,8 @@ class CustomTrainer(Trainer):
 
 
 def train(config):
+    seed_everything(config.seed)
+    
     # load model and tokenizer
     MODEL_NAME = config.arch["type"]
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -56,19 +54,17 @@ def train(config):
     # 1. load dataset
     # 2. preprocess dataset
     # 3. tokenize dataset
-    revision = config.dataloader["args"]["revision"]
+    revision = config.dataloader["revision"]
 
     train_dataset, train_raw_label = load_train_dataset("train", revision, tokenizer)
-    dev_dataset, dev_raw_label = load_train_dataset(
-        "train", revision, tokenizer
-    )  # validation용 데이터는 따로 만드셔야 합니다.
+    dev_dataset, dev_raw_label = load_train_dataset("validation", revision, tokenizer)  # validation용 데이터는 따로 만드셔야 합니다.
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)
 
     # 4. make Dataset object
-    RE_train_dataset = RE_Dataset(train_dataset, train_label)
-    RE_dev_dataset = RE_Dataset(dev_dataset, dev_label)
+    re_train_dataset = RE_Dataset(train_dataset, train_label)
+    re_dev_dataset = RE_Dataset(dev_dataset, dev_label)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
@@ -92,37 +88,26 @@ def train(config):
     ## https://huggingface.co/transformers/main_classes/trainer.html#trainingarguments 참고해주세요.
     training_args = TrainingArguments(
         output_dir=config.trainer["output_dir"],  # output directory
-        save_total_limit=config.trainer[
-            "save_total_limit"
-        ],  # number of total save model
+        save_total_limit=config.trainer["save_total_limit"],  # number of total save model
         save_steps=config.trainer["save_steps"],  # model saving step
         num_train_epochs=config.trainer["epochs"],  # total number of training epochs
-        learning_rate=config.optimizer["args"]["lr"],  # learning_rate
-        per_device_train_batch_size=config.dataloader["args"][
-            "batch_size"
-        ],  # batch size per device during training
-        per_device_eval_batch_size=config.dataloader["args"][
-            "batch_size"
-        ],  # batch size for evaluation
-        warmup_steps=config.lr_scheduler["args"][
-            "warmup_steps"
-        ],  # number of warmup steps for learning rate scheduler
-        weight_decay=config.optimizer["args"][
-            "weight_decay"
-        ],  # strength of weight decay
+        learning_rate=config.optimizer["lr"],  # learning_rate
+        per_device_train_batch_size=config.dataloader["batch_size"],  # batch size per device during training
+        per_device_eval_batch_size=config.dataloader["batch_size"],  # batch size for evaluation
+        # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
+        warmup_ratio=config.trainer['warmup_ratio'],
+        weight_decay=config.optimizer["weight_decay"],  # strength of weight decay
+        adam_beta2=config.optimizer["adam_beta2"],  # the beta2 hyperparameter for the [`AdamW`] optimizer.
         logging_dir=config.trainer["logging_dir"],  # directory for storing logs
         logging_steps=config.trainer["logging_steps"],  # log saving step.
-        evaluation_strategy=config.trainer[
-            "evaluation_strategy"
-        ],  # evaluation strategy to adopt during training
+        evaluation_strategy=config.trainer["evaluation_strategy"],  # evaluation strategy to adopt during training
+        save_strategy=config.trainer["save_strategy"],
         # `no`: No evaluation during training.
         # `steps`: Evaluate every `eval_steps`.
         # `epoch`: Evaluate every end of epoch.
         eval_steps=config.trainer["evaluation_steps"],  # evaluation step
         load_best_model_at_end=True,
-        report_to=(
-            "wandb" if config.use_wandb else "none"
-        ),  # integrations to report the results and logs to
+        report_to=("wandb" if config.use_wandb else "none"),  # integrations to report the results and logs to
     )
 
     # 7. trainer 설정
@@ -131,9 +116,10 @@ def train(config):
         model=model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
         train_dataset=RE_train_dataset,  # training dataset
-        # eval_dataset=RE_train_dataset,  # evaluation dataset
+        eval_dataset=RE_train_dataset,  # evaluation dataset
         compute_metrics=compute_metrics,  # define metrics function
-        callbacks=([WandbCallback()] if config.use_wandb else []),
+        # callbacks=([WandbCallback()] if config.use_wandb else []),
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer["early_stop"])],
     )
 
     # 9. train model
@@ -163,9 +149,9 @@ if __name__ == "__main__":
     if config.use_wandb:
         run_name = "{}_{}_{}_{}_{}".format(
             config.arch["type"],
-            config.dataloader["args"]["batch_size"],
+            config.dataloader["batch_size"],
             config.trainer["epochs"],
-            config.optimizer["args"]["lr"],
+            config.optimizer["lr"],
             config.loss["type"],
         )
 

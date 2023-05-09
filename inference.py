@@ -1,11 +1,11 @@
 import torch
-import argparse
 import numpy as np
 import pandas as pd
 import pickle as pickle
 import torch.nn.functional as F
 from tqdm import tqdm
 from load_data import *
+from utils import *
 from args import parse_arguments
 from torch.utils.data import DataLoader
 from transformers import (
@@ -18,6 +18,7 @@ from transformers import (
 
 
 def inference(model, tokenized_sent, device):
+    seed_everything(config.seed)
     """
     test dataset을 DataLoader로 만들어 준 후,
     batch_size로 나눠 model이 예측 합니다.
@@ -82,13 +83,13 @@ def main(config):
     model.to(device)
 
     # load test dataset
-    revision = config.dataloader["args"]["revision"]
+    revision = config.dataloader["revision"]
     test_id, test_dataset, test_label = load_test_dataset("test", revision, tokenizer)
-    Re_test_dataset = RE_Dataset(test_dataset, test_label)
+    re_test_dataset = RE_Dataset(test_dataset, test_label)
 
     # predict answer
     pred_answer, output_prob = inference(
-        model, Re_test_dataset, device
+        model, re_test_dataset, device
     )  # model에서 class 추론
     pred_answer = num_to_label(pred_answer)  # 숫자로 된 class를 원래 문자열 라벨로 변환
 
@@ -100,9 +101,33 @@ def main(config):
             "probs": output_prob,
         }
     )
-    output.to_csv(
-        "./prediction/submission.csv", index=False
-    )  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+    output_path = config.pred_path
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output.to_csv(output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+
+    ## 사후분석을 위한 validation data inference
+    # load validation dataset
+    val_id, val_dataset, val_label = load_test_dataset("validation", revision, tokenizer)
+    Re_val_dataset = RE_Dataset(val_dataset, [100] * len(val_id))
+
+    # predict validation answer
+    pred_val_answer, val_output_prob = inference(
+        model, Re_val_dataset, device
+    )
+    pred_val_answer = num_to_label(pred_val_answer)
+
+    # make csv file with predicted validation answer
+    val_output = pd.DataFrame(
+        {
+            "id": val_id,
+            "true_label": val_label,
+            "pred_label": pred_val_answer,
+            "probs": val_output_prob,
+        }
+    )
+    val_output.to_csv(
+        "./prediction/validation_output.csv", index=False
+    )
 
     print("---- Finish! ----")
 

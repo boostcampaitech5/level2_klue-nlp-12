@@ -9,7 +9,11 @@ prediction/
 results/
 saved/
 wandb/
+configs/
 
 EDA.ipynb
 config*.yaml
 !config.yaml
+output*.log
+nohup*.out
+run_exps.sh
