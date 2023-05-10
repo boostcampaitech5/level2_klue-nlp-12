@@ -60,8 +60,8 @@ def train(config):
     # 3. tokenize dataset
     revision = config.dataloader["revision"]
 
-    train_dataset, train_raw_label = load_train_dataset("train", revision, tokenizer)
-    dev_dataset, dev_raw_label = load_train_dataset("validation", revision, tokenizer)
+    train_dataset, train_raw_label = load_train_dataset(config.dataloader['train_split'], revision, tokenizer)
+    dev_dataset, dev_raw_label = load_train_dataset(config.dataloader['valid_split'], revision, tokenizer)
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)

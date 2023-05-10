@@ -7,6 +7,8 @@ arch:
   type: klue/roberta-large
 dataloader:
   type: REDataModule
+  train_split: train
+  valid_split: validation
   batch_size: 32
   shuffle: true
   revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
