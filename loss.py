@@ -6,8 +6,8 @@ import torch.nn.functional as F
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=2, reduction='mean'):
         super(FocalLoss, self).__init__()
-        self.alpha = alpha
-        self.gamma = gamma
+        self.alpha = alpha   # 각 클래스에 대한 가중치
+        self.gamma = gamma   # "focus" 매개변수로 어려운 예시에 더 많은 주의를 기울이는 역할
         self.reduction = reduction
 
     def forward(self, inputs, targets):
@@ -64,9 +64,44 @@ class LovaszSoftmaxLoss(nn.Module):
             return lovasz_loss
 
 
+class MulticlassDiceLoss(nn.Module):
+    def __init__(self, weight=None, reduction='mean'):
+        super(MulticlassDiceLoss, self).__init__()
+        self.weight = weight
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        # Softmax over the inputs
+        inputs = torch.softmax(inputs, dim=1)
+
+        # One-hot encode targets
+        targets_one_hot = torch.nn.functional.one_hot(targets, num_classes=inputs.shape[1])
+        
+        # Move targets_one_hot to device of inputs
+        targets_one_hot = targets_one_hot.to(inputs.device)
+
+        # Calculate Dice Loss for each class
+        dice_loss = 0
+        for i in range(inputs.shape[1]):
+            numerator = 2 * torch.sum(inputs[:, i] * targets_one_hot[:, i])
+            denominator = torch.sum(inputs[:, i] + targets_one_hot[:, i])
+            dice_loss += (1 - (numerator + 1) / (denominator + 1))
+
+        # Average the dice loss for all classes
+        dice_loss /= inputs.shape[1]
+
+        if self.reduction == 'mean':
+            return torch.mean(dice_loss)
+        elif self.reduction == 'sum':
+            return torch.sum(dice_loss)
+        else:
+            return dice_loss
+
+
 loss_function = {'lovasz_loss': LovaszSoftmaxLoss, 
                  'focal_loss': FocalLoss, 
                  'smooth_L1_loss' : torch.nn.SmoothL1Loss,
+                 'dice_loss' : MulticlassDiceLoss,
                  'default' : torch.nn.CrossEntropyLoss}
 
 def change_loss_function(loss_function_name, **kwargs):
