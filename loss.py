@@ -65,35 +65,35 @@ class LovaszSoftmaxLoss(nn.Module):
 
 
 class MulticlassDiceLoss(nn.Module):
-    def __init__(self, weight=None, reduction='mean'):
+    def __init__(self, smooth=1e-5, reduction='mean'):
         super(MulticlassDiceLoss, self).__init__()
-        self.weight = weight
+        self.smooth = smooth
         self.reduction = reduction
 
     def forward(self, inputs, targets):
-        # Softmax over the inputs
+        # Softmax over the inputs: 입력 텐서에 대해 softmax 함수를 적용
         inputs = torch.softmax(inputs, dim=1)
-
-        # One-hot encode targets
-        targets_one_hot = torch.nn.functional.one_hot(targets, num_classes=inputs.shape[1])
         
+        # One-hot encode targets: 목표 텐서를 원-핫 인코딩으로 변환
+        targets_one_hot = torch.nn.functional.one_hot(targets, num_classes=inputs.shape[1])
+
         # Move targets_one_hot to device of inputs
         targets_one_hot = targets_one_hot.to(inputs.device)
 
         # Calculate Dice Loss for each class
         dice_loss = 0
         for i in range(inputs.shape[1]):
-            numerator = 2 * torch.sum(inputs[:, i] * targets_one_hot[:, i])
-            denominator = torch.sum(inputs[:, i] + targets_one_hot[:, i])
-            dice_loss += (1 - (numerator + 1) / (denominator + 1))
+            intersection = 2 * (inputs[:, i] * targets_one_hot[:, i]).sum()
+            union = inputs[:, i].sum() + targets_one_hot[:, i].sum()
+            dice_loss += (1 - (intersection + self.smooth) / (union + self.smooth))
 
         # Average the dice loss for all classes
         dice_loss /= inputs.shape[1]
 
         if self.reduction == 'mean':
-            return torch.mean(dice_loss)
+            return dice_loss
         elif self.reduction == 'sum':
-            return torch.sum(dice_loss)
+            return dice_loss.sum()
         else:
             return dice_loss
 
