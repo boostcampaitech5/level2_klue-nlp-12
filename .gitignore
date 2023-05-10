@@ -10,6 +10,7 @@ results/
 saved/
 wandb/
 configs/
+EDA/
 
 EDA.ipynb
 config*.yaml
