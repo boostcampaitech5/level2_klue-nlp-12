@@ -24,7 +24,6 @@ def load_train_dataset(split, revision, tokenizer):
     pd_dataset = (
         dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({"id": "int64"})
     )
-    pd_dataset = pd_dataset.sample(frac=1).reset_index(drop=True)
     train_dataset = preprocessing_dataset(pd_dataset)
     tokenized_train = tokenized_dataset(train_dataset, tokenizer)
     train_label = pd_dataset["label"].values
