@@ -59,9 +59,10 @@ def train(config):
     # 2. preprocess dataset
     # 3. tokenize dataset
     revision = config.dataloader["revision"]
+    input_format = config.dataloader["input_format"]
 
-    train_dataset, train_raw_label = load_train_dataset(config.dataloader['train_split'], revision, tokenizer)
-    dev_dataset, dev_raw_label = load_train_dataset(config.dataloader['valid_split'], revision, tokenizer)
+    train_dataset, train_raw_label = load_train_dataset(config.dataloader['train_split'], revision, tokenizer, input_format)
+    dev_dataset, dev_raw_label = load_train_dataset(config.dataloader['valid_split'], revision, tokenizer, input_format)
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)
@@ -82,6 +83,7 @@ def train(config):
     model = AutoModelForSequenceClassification.from_pretrained(
         MODEL_NAME, config=model_config
     )
+    model.resize_token_embeddings(len(tokenizer))
     print(model.config)
 
     model.parameters
@@ -108,7 +110,7 @@ def train(config):
 
         # 스케줄링 설정
         warmup_ratio=config.lr_scheduler['warmup_ratio'],  # learning rate scheduler의 warmup 비율
-            # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
+        # warmup_steps=config.lr_scheduler["warmup_steps"],  # number of warmup steps for learning rate scheduler
 
         # 로깅 설정
         logging_dir=config.trainer["logging_dir"],  # 로그 저장 디렉토리
