@@ -1,0 +1,19 @@
+---
+name: new function added!
+about: when you propose new function~~!
+title: "[FEAT]"
+labels: ''
+assignees: ''
+
+---
+
+## Background
+-
+-
+
+## To Do
+- [ ] 
+- [ ]
+
+## See Also
+-
