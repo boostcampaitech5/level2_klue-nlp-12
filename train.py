@@ -61,20 +61,23 @@ def train(config):
     revision = config.dataloader["revision"]
     input_format = config.dataloader.get("input_format")
     prompt = config.dataloader.get("prompt")
+    type_transform = config.dataloader.get("type_transform")
 
     train_dataset, train_raw_label = load_train_dataset(
         split = config.dataloader['train_split'],
         revision = revision,
         tokenizer = tokenizer,
         input_format = input_format,
-        prompt = prompt
+        prompt = prompt,
+        type_transform = type_transform
         )
     dev_dataset, dev_raw_label = load_train_dataset(
         split = config.dataloader['valid_split'],
         revision = revision,
         tokenizer = tokenizer,
         input_format = input_format,
-        prompt = prompt
+        prompt = prompt,
+        type_transform = type_transform
         )
 
     train_label = label_to_num(train_raw_label)
