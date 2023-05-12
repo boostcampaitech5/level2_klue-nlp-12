@@ -62,8 +62,20 @@ def train(config):
     input_format = config.dataloader.get("input_format")
     prompt = config.dataloader.get("prompt")
 
-    train_dataset, train_raw_label = load_train_dataset(config.dataloader['train_split'], revision, tokenizer, input_format, prompt)
-    dev_dataset, dev_raw_label = load_train_dataset(config.dataloader['valid_split'], revision, tokenizer, input_format, prompt)
+    train_dataset, train_raw_label = load_train_dataset(
+        split = config.dataloader['train_split'],
+        revision = revision,
+        tokenizer = tokenizer,
+        input_format = input_format,
+        prompt = prompt
+        )
+    dev_dataset, dev_raw_label = load_train_dataset(
+        split = config.dataloader['valid_split'],
+        revision = revision,
+        tokenizer = tokenizer,
+        input_format = input_format,
+        prompt = prompt
+        )
 
     train_label = label_to_num(train_raw_label)
     dev_label = label_to_num(dev_raw_label)
