@@ -27,7 +27,7 @@ def inference(model, tokenized_sent, device):
 
     seed_everything(config.seed)
     
-    dataloader = DataLoader(tokenized_sent, batch_size=16, shuffle=False)
+    dataloader = DataLoader(tokenized_sent, batch_size=32, shuffle=False)
     model.eval()
 
     output_pred = []
@@ -90,7 +90,16 @@ def main(config):
 
     # load test dataset
     revision = config.dataloader["revision"]
-    test_id, test_dataset, test_label = load_test_dataset("test", revision, tokenizer)
+    input_format = config.dataloader.get("input_format")
+    prompt = config.dataloader.get("prompt")
+
+    test_id, test_dataset, test_label = load_test_dataset(
+        split = "test", 
+        revision = revision, 
+        tokenizer = tokenizer, 
+        input_format = input_format, 
+        prompt = prompt
+        )
     re_test_dataset = RE_Dataset(test_dataset, test_label)
 
     # predict answer
@@ -113,7 +122,13 @@ def main(config):
 
     ## 사후분석을 위한 validation data inference
     # load validation dataset
-    val_id, val_dataset, val_label = load_test_dataset("train[60%:80%]", revision, tokenizer)
+    val_id, val_dataset, val_label = load_test_dataset(
+        split = config.dataloader['valid_split'], 
+        revision = revision, 
+        tokenizer = tokenizer, 
+        input_format = input_format, 
+        prompt = prompt
+        )
     Re_val_dataset = RE_Dataset(val_dataset, [100] * len(val_id))
 
     # predict validation answer
