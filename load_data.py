@@ -1,14 +1,22 @@
 import os
 import re
-import torch
-import pandas as pd
 import pickle as pickle
+
+import pandas as pd
+import torch
 from tqdm import tqdm
 from datasets import load_dataset
 
 
-def load_train_dataset(split, revision, tokenizer, input_format="default", prompt="default"):
+def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=None):
     """train dataset을 불러온 후, tokenizing 합니다."""
+
+    if input_format is None:
+        input_format = "default"
+    if prompt is None:
+        prompt = "default"
+    print("input format: ",input_format, "prompt: ", prompt)
+
     dataset = load_dataset(
         "Smoked-Salmon-s/RE_Competition",
         split=split,
@@ -16,19 +24,22 @@ def load_train_dataset(split, revision, tokenizer, input_format="default", promp
         revision=revision,
     )
     pd_dataset = dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({"id": "int64"})
-    print(pd_dataset.sample(5))
     train_dataset = preprocessing_dataset(pd_dataset, input_format)
-    print(train_dataset.sample(5))
     tokenized_train = tokenized_dataset(train_dataset, tokenizer, input_format, prompt)
-    print(tokenized_train)
     train_label = pd_dataset["label"].values
-    print(train_label.shape)
 
     return tokenized_train, train_label
 
 
-def load_test_dataset(split, revision, tokenizer, input_format="default", prompt="default"):
+def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None):
     """test dataset을 불러온 후, tokenizing 합니다."""
+
+    if input_format is None:
+        input_format = "default"
+    if prompt is None:
+        prompt = "default"
+    print("input format: ",input_format, "prompt: ", prompt)
+
     dataset = load_dataset(
         "Smoked-Salmon-s/RE_Competition",
         split=split,
@@ -36,11 +47,9 @@ def load_test_dataset(split, revision, tokenizer, input_format="default", prompt
         revision=revision,
     )
     pd_dataset = dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({"id": "int64"})
-    print(pd_dataset.sample(5))
     test_dataset = preprocessing_dataset(pd_dataset, input_format)
-    print(test_dataset.sample(5))
     tokenized_test = tokenized_dataset(test_dataset, tokenizer, input_format, prompt)
-    print(tokenized_test)
+    
     if split == "test":
         test_label = list(map(int, pd_dataset["label"].values))
     else:
@@ -201,7 +210,7 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             add_special_tokens=True,
             )
             
-    else:
+    elif prompt == "default":
         tokenized_sentences = tokenizer(
             list(dataset["sentence"]),
             return_tensors="pt",
@@ -210,6 +219,9 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             max_length=256,
             add_special_tokens=True,
         )
+
+    else:
+        raise ValueError("잘못된 prompt가 입력되었습니다. ")
 
     return tokenized_sentences
 
