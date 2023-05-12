@@ -159,6 +159,31 @@ def preprocessing_dataset(dataset, input_format):
     dataset['subj_entity'] = subject_entity
     dataset['obj_entity'] = object_entity
 
+
+    def to_hangul(sent):
+        dic = {"ORG" : "조직",
+        "PER" : "사람",
+        "DAT" : "시간",
+        "LOC" : "장소",
+        "POH" : "기타표현",
+        "NOH" : "기타수량표현"}
+        
+        sub = eval(sent['subject_entity'])
+        obj = eval(sent['object_entity'])
+
+        sub['type'] = dic[sub['type']]
+        obj['type'] = dic[obj['type']]
+
+        sent['subject_entity'] = str(sub)
+        sent['object_entity'] = str(obj)
+        
+        return sent['subject_entity'], sent['object_entity']
+    
+    hanguled = [to_hangul(row_data) for index, row_data in tqdm(dataset.iterrows())]
+    dataset['subject_entity'] = [x[0] for x in hanguled]
+    dataset['object_entity'] = [x[1] for x in hanguled]
+
+
     input_format_list = ["entity_mask", "entity_marker", "entity_marker_punct", "typed_entity_marker", "typed_entity_marker_punct"]
     if input_format in input_format_list:
         marked_sentences = [marker(row_data, input_format) for index, row_data in tqdm(dataset.iterrows())]

@@ -121,34 +121,37 @@ def main(config):
     output.to_csv(output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
 
     ## 사후분석을 위한 validation data inference
-    # load validation dataset
-    val_id, val_dataset, val_label = load_test_dataset(
-        split = config.dataloader['valid_split'], 
-        revision = revision, 
-        tokenizer = tokenizer, 
-        input_format = input_format, 
-        prompt = prompt
+    # load validation dataset(full train일 경우 revision에 valid가 없어서 load_test_dataset에서 오류가 생기므로 넘기기)
+    try:
+        val_id, val_dataset, val_label = load_test_dataset(
+            split = config.dataloader['valid_split'], 
+            revision = revision, 
+            tokenizer = tokenizer, 
+            input_format = input_format, 
+            prompt = prompt
+            )
+        Re_val_dataset = RE_Dataset(val_dataset, [100] * len(val_id))
+
+        # predict validation answer
+        pred_val_answer, val_output_prob = inference(
+            model, Re_val_dataset, device
         )
-    Re_val_dataset = RE_Dataset(val_dataset, [100] * len(val_id))
+        pred_val_answer = num_to_label(pred_val_answer)
 
-    # predict validation answer
-    pred_val_answer, val_output_prob = inference(
-        model, Re_val_dataset, device
-    )
-    pred_val_answer = num_to_label(pred_val_answer)
-
-    # make csv file with predicted validation answer
-    val_output = pd.DataFrame(
-        {
-            "id": val_id,
-            "true_label": val_label,
-            "pred_label": pred_val_answer,
-            "probs": val_output_prob,
-        }
-    )
-    val_output_path = config.trainer["val_pred_dir"]  
-    os.makedirs(os.path.dirname(val_output_path), exist_ok=True)
-    val_output.to_csv(val_output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+        # make csv file with predicted validation answer
+        val_output = pd.DataFrame(
+            {
+                "id": val_id,
+                "true_label": val_label,
+                "pred_label": pred_val_answer,
+                "probs": val_output_prob,
+            }
+        )
+        val_output_path = config.trainer["val_pred_dir"]  
+        os.makedirs(os.path.dirname(val_output_path), exist_ok=True)
+        val_output.to_csv(val_output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+    except ValueError:
+        print('There is no existing valiation dataset. The inference output is from full dataset model.')
 
     print("---- Finish! ----")
 
