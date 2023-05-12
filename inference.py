@@ -27,7 +27,7 @@ def inference(model, tokenized_sent, device):
 
     seed_everything(config.seed)
     
-    dataloader = DataLoader(tokenized_sent, batch_size=16, shuffle=False)
+    dataloader = DataLoader(tokenized_sent, batch_size=32, shuffle=False)
     model.eval()
 
     output_pred = []
@@ -90,8 +90,8 @@ def main(config):
 
     # load test dataset
     revision = config.dataloader["revision"]
-    input_format = config.dataloader["input_format"]
-    prompt = config.dataloader["prompt"]
+    input_format = config.dataloader.get("input_format")
+    prompt = config.dataloader.get("prompt")
 
     test_id, test_dataset, test_label = load_test_dataset("test", revision, tokenizer, input_format, prompt)
     re_test_dataset = RE_Dataset(test_dataset, test_label)
