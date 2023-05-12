@@ -163,6 +163,10 @@ def preprocessing_dataset(dataset, input_format):
     if input_format in input_format_list:
         marked_sentences = [marker(row_data, input_format) for index, row_data in tqdm(dataset.iterrows())]
         dataset['sentence'] = marked_sentences
+    elif input_format == "default":
+        pass
+    else:
+        raise ValueError("잘못된 input_format이 입력되었습니다. ")
 
     return dataset
 
