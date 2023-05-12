@@ -58,7 +58,12 @@ def train(config):
 
     # 5. import model
     # setting model hyperparameter
-    model = REBaseModel(config, tokenizer.vocab_size)
+    model_module = __import__('model', fromlist=[config.model['variant']])
+    model_class = getattr(model_module, config.model['variant'])
+    # Available customized classes:
+    #   REBaseModel, REBiLSTMModel, REBiGRUModel
+    model = model_class(config, tokenizer.vocab_size)
+
     print(model.model_config)
 
     model.parameters
