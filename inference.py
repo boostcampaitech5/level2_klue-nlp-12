@@ -141,6 +141,7 @@ def main():
         val_output_path = config.trainer['val_pred_dir']
         os.makedirs(os.path.dirname(val_output_path), exist_ok=True)
         val_output.to_csv(val_output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+        
     except ValueError:
         print('There is no existing valiation dataset. The inference output is from full dataset model.')
 
