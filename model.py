@@ -2,6 +2,7 @@ import torch.nn as nn
 from torch.cuda.amp import autocast
 from transformers import (
     AutoConfig,
+    AutoModel,
     AutoModelForSequenceClassification,
 )
 
@@ -14,10 +15,12 @@ class REBaseModel(nn.Module):
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
         self.model_config.num_labels = config.num_labels
-
-        self.plm = AutoModelForSequenceClassification.from_pretrained(config.model['name'],
-                                                                      config=self.model_config)
+        
+        self.plm = AutoModel.from_pretrained(config.model['name'],
+                                             config=self.model_config)
         self.plm.resize_token_embeddings(vocab_size)
+        self.classifier = nn.Linear(self.plm.config.hidden_size, config.num_labels)
+        
 
     @autocast()
     def forward(
@@ -30,7 +33,8 @@ class REBaseModel(nn.Module):
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask)
-        logits = outputs['logits']
+        pooler_output = outputs.pooler_output
+        logits = self.classifier(pooler_output)
         return {
             'logits': logits,
         }
