@@ -92,13 +92,15 @@ def main(config):
     revision = config.dataloader["revision"]
     input_format = config.dataloader.get("input_format")
     prompt = config.dataloader.get("prompt")
+    type_transform = config.dataloader.get("type_transform")
 
     test_id, test_dataset, test_label = load_test_dataset(
         split = "test", 
         revision = revision, 
         tokenizer = tokenizer, 
         input_format = input_format, 
-        prompt = prompt
+        prompt = prompt,
+        type_transform = type_transform
         )
     re_test_dataset = RE_Dataset(test_dataset, test_label)
 
@@ -128,7 +130,8 @@ def main(config):
             revision = revision, 
             tokenizer = tokenizer, 
             input_format = input_format, 
-            prompt = prompt
+            prompt = prompt,
+            type_transform = type_transform
             )
         Re_val_dataset = RE_Dataset(val_dataset, [100] * len(val_id))
 
@@ -150,6 +153,7 @@ def main(config):
         val_output_path = config.trainer["val_pred_dir"]  
         os.makedirs(os.path.dirname(val_output_path), exist_ok=True)
         val_output.to_csv(val_output_path, index=False)  # 최종적으로 완성된 예측한 라벨 csv 파일 형태로 저장
+        
     except ValueError:
         print('There is no existing valiation dataset. The inference output is from full dataset model.')
 
