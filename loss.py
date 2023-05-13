@@ -31,14 +31,14 @@ class CrossEntropyLoss(nn.Module):
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, alpha: float = 1, gamma: float = 2, reduction: str = 'mean') -> None:
+    def __init__(self, alpha: float = 1.0, gamma: float = 2.0, reduction: str = 'mean') -> None:
         super(FocalLoss, self).__init__()
         self.alpha = alpha   # 각 클래스에 대한 가중치
         self.gamma = gamma   # "focus" 매개변수로 어려운 예시에 더 많은 주의를 기울이는 역할
         self.reduction = reduction
 
     def forward(self, inputs: Tensor, targets: Tensor):
-        ce_loss = nn.CrossEntropyLoss(reduction='none')(inputs, targets)
+        ce_loss = nn.CrossEntropyLoss(reduction=self.reduction)(inputs, targets)
         pt = torch.exp(-ce_loss)
         focal_loss = self.alpha * (1 - pt)**self.gamma * ce_loss
 
