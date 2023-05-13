@@ -3,13 +3,12 @@ from torch.cuda.amp import autocast
 from transformers import (
     AutoConfig,
     AutoModel,
-    AutoModelForSequenceClassification,
 )
 
 from loss import *
 
 
-class REBaseModel(nn.Module):
+class BaseREModel(nn.Module):
     def __init__(self, config, vocab_size: int):
         super().__init__()
 
@@ -40,7 +39,7 @@ class REBaseModel(nn.Module):
         }
 
 
-class REBiGRUModel(nn.Module):
+class BiGRUREModel(nn.Module):
     def __init__(self, config, vocab_size: int):
         super().__init__()
 
@@ -52,6 +51,7 @@ class REBiGRUModel(nn.Module):
         self.plm.resize_token_embeddings(vocab_size)
 
         self.hidden_size = self.model_config.hidden_size  # 1024 for roberta-large
+        # TODO: implement initialization of gru, classifier
         self.gru = nn.GRU(input_size=self.hidden_size,
                           hidden_size=self.hidden_size,
                           num_layers=1,
@@ -60,12 +60,11 @@ class REBiGRUModel(nn.Module):
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
 
     def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
-        # (bsz, max_seq_len, hidden_size)
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask).last_hidden_state
-        _, last_hidden = self.gru(outputs)
-        outputs = torch.cat([last_hidden[0], last_hidden[1]], dim=1)
+        _, next_hidden = self.gru(outputs)
+        outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
         logits = self.classifier(outputs)
         return {
             'logits': logits,
