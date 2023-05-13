@@ -87,6 +87,7 @@ def main():
     revision = config.dataloader['revision']
     input_format = config.dataloader.get('input_format')
     prompt = config.dataloader.get('prompt')
+    type_transform = config.dataloader.get('type_transform')
 
     test_id, test_dataset, test_label = load_test_dataset(
         split='test',
@@ -94,6 +95,7 @@ def main():
         tokenizer=tokenizer,
         input_format=input_format,
         prompt=prompt,
+        type_transform=type_transform,
     )
     re_test_dataset = REDataset(test_dataset, test_label)
 
@@ -122,6 +124,7 @@ def main():
             tokenizer=tokenizer,
             input_format=input_format,
             prompt=prompt,
+            type_transform=type_transform,
         )
         re_val_dataset = REDataset(val_dataset, [100] * len(val_id))
 
