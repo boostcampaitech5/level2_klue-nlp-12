@@ -6,7 +6,7 @@ use_wandb: false
 num_labels: 30
 model:
   name: klue/roberta-large
-  variant: REBaseModel
+  variant: BaseREModel
 dataloader:
   type: REDataModule
   input_format: entity_mask

@@ -69,26 +69,12 @@ def main():
     model_name = config.model['name']
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # load my model
-    model_module = __import__('model', fromlist=[config.model['variant']])
-    model_class = getattr(model_module, config.model['variant'])
-    # Available customized classes:
-    #   REBaseModel, REBiLSTMModel, REBiGRUModel
-    model = model_class(config, tokenizer.vocab_size)
-
-    load_model_path = './best_model/pytorch_model.bin'
-    checkpoint = torch.load(load_model_path)
-    model.load_state_dict(checkpoint)
-
-    model.parameters
-    model.to(device)
-
     # load test dataset
     revision = config.dataloader['revision']
     input_format = config.dataloader.get('input_format')
     prompt = config.dataloader.get('prompt')
 
-    test_id, test_dataset, test_label = load_test_dataset(
+    test_id, test_dataset, test_label, num_added_tokens = load_test_dataset(
         split='test',
         revision=revision,
         tokenizer=tokenizer,
@@ -96,6 +82,20 @@ def main():
         prompt=prompt,
     )
     re_test_dataset = REDataset(test_dataset, test_label)
+
+    # load my model
+    model_module = __import__('model', fromlist=[config.model['variant']])
+    model_class = getattr(model_module, config.model['variant'])
+    # Available customized classes:
+    #   BaseREModel, BiLSTMREModel, BiGRUREModel
+    model = model_class(config, tokenizer.vocab_size + num_added_tokens)
+
+    load_model_path = './best_model/pytorch_model.bin'
+    checkpoint = torch.load(load_model_path)
+    model.load_state_dict(checkpoint)
+
+    model.parameters
+    model.to(device)
 
     # predict answer
     pred_answer, output_prob = inference(model, re_test_dataset, device)  # model에서 class 추론

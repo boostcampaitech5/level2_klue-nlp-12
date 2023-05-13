@@ -48,14 +48,14 @@ def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None
     )
     pd_dataset = dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({'id': 'int64'})
     test_dataset = preprocessing_dataset(pd_dataset, input_format, type_transform)
-    tokenized_test, _ = tokenized_dataset(test_dataset, tokenizer, input_format, prompt)
+    tokenized_test, num_added_tokens = tokenized_dataset(test_dataset, tokenizer, input_format, prompt)
     
     if split == 'test':
         test_label = list(map(int, pd_dataset['label'].values))
     else:
         test_label = pd_dataset['label'].values
 
-    return test_dataset['id'], tokenized_test, test_label
+    return test_dataset['id'], tokenized_test, test_label, num_added_tokens
 
 
 def preprocessing_dataset(dataset, input_format, type_transform=False):
