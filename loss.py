@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing import Optional
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,38 +9,23 @@ from torch import Tensor
 
 
 class CrossEntropyLoss(nn.Module):
-    def __init__(self,
-                 weight: Optional[Tensor] = None,
-                 size_average=None,
-                 ignore_index: int = -100,
-                 reduce=None,
-                 reduction: str = 'mean',
-                 label_smoothing: float = 0.0) -> None:
-        super().__init__(weight, size_average, reduce, reduction)
-        self.ignore_index = ignore_index
-        self.label_smoothing = label_smoothing
-        self.reduce = reduce
+    def __init__(self, reduction: str = 'mean') -> None:
+        super().__init__()
         self.reduction = reduction
-        self.size_average = size_average
-        self.weight = weight
 
-    def forward(self, input: Tensor, target: Tensor) -> Tensor:
-        return F.cross_entropy(input, target,
-                               weight=self.weight,
-                               ignore_index=self.ignore_index,
-                               reduction=self.reduction,
-                               label_smoothing=self.label_smoothing)
+    def forward(self, inputs: Tensor, targets: Tensor) -> Tensor:
+        return F.cross_entropy(inputs, targets, reduction=self.reduction)
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, alpha: float = 1, gamma: float = 2, reduction: str = 'mean') -> None:
+    def __init__(self, alpha: float = 1.0, gamma: float = 2.0, reduction: str = 'mean') -> None:
         super(FocalLoss, self).__init__()
         self.alpha = alpha   # 각 클래스에 대한 가중치
         self.gamma = gamma   # "focus" 매개변수로 어려운 예시에 더 많은 주의를 기울이는 역할
         self.reduction = reduction
 
     def forward(self, inputs: Tensor, targets: Tensor):
-        ce_loss = nn.CrossEntropyLoss(reduction='none')(inputs, targets)
+        ce_loss = nn.CrossEntropyLoss(reduction=self.reduction)(inputs, targets)
         pt = torch.exp(-ce_loss)
         focal_loss = self.alpha * (1 - pt)**self.gamma * ce_loss
 
@@ -51,6 +38,7 @@ class FocalLoss(nn.Module):
 
 
 class LovaszSoftmaxLoss(nn.Module):
+    def __init__(self, weight=None, reduction: str = 'mean'):
     def __init__(self, weight=None, reduction: str = 'mean'):
         super(LovaszSoftmaxLoss, self).__init__()
         self.weight = weight
@@ -80,6 +68,7 @@ class LovaszSoftmaxLoss(nn.Module):
         return torch.stack(losses)
 
     def forward(self, inputs: Tensor, targets: Tensor):
+    def forward(self, inputs: Tensor, targets: Tensor):
         log_probs = F.log_softmax(inputs, dim=1)
         lovasz_loss = self.lovasz_softmax(log_probs, targets)
 
@@ -93,13 +82,16 @@ class LovaszSoftmaxLoss(nn.Module):
 
 class MulticlassDiceLoss(nn.Module):
     def __init__(self, smooth: float = 1e-5, reduction: str = 'mean'):
+    def __init__(self, smooth: float = 1e-5, reduction: str = 'mean'):
         super(MulticlassDiceLoss, self).__init__()
         self.smooth = smooth
         self.reduction = reduction
 
     def forward(self, inputs: Tensor, targets: Tensor):
+    def forward(self, inputs: Tensor, targets: Tensor):
         # Softmax over the inputs
         inputs = torch.softmax(inputs, dim=1)
+
 
         # One-hot encode targets
         targets_one_hot = torch.nn.functional.one_hot(targets, num_classes=inputs.shape[1])
