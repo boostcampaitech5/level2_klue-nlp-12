@@ -1,5 +1,6 @@
 import sys
 import pickle as pickle
+import pytz
 from datetime import datetime
 
 import torch
@@ -30,6 +31,7 @@ def train(config):
     revision = config.dataloader['revision']
     input_format = config.dataloader.get('input_format')
     prompt = config.dataloader.get('prompt')
+    type_transform = config.dataloader.get('type_transform')
 
     train_dataset, train_raw_label = load_train_dataset(
         split=config.dataloader['train_split'],
@@ -37,6 +39,7 @@ def train(config):
         tokenizer=tokenizer,
         input_format=input_format,
         prompt=prompt,
+        type_transform=type_transform,
     )
     dev_dataset, dev_raw_label = load_train_dataset(
         split=config.dataloader['valid_split'],
@@ -44,6 +47,7 @@ def train(config):
         tokenizer=tokenizer,
         input_format=input_format,
         prompt=prompt,
+        type_transform=type_transform,
     )
 
     train_label = label_to_num(train_raw_label)
@@ -133,8 +137,8 @@ def main():
         config_path = './config.yaml'
     config = parse_arguments(config_path)
 
-    now = datetime.now()
-    run_name = f'{config.run_name}_{now}'
+    now = datetime.now(pytz.timezone('Asia/Seoul'))
+    run_name = f'{config.run_name}_{now.strftime("%d-%H-%M")}'
 
     init_wandb(config, run_name)
     train(config)

@@ -1,31 +1,33 @@
 ---
-name: exp-name
+run_name: exp-name
 n_gpu: 1
 seed: 420
-use_wandb: true
-arch:
-  type: klue/roberta-large
+use_wandb: false
+num_labels: 30
+model:
+  name: klue/roberta-large
+  variant: REBaseModel
 dataloader:
   type: REDataModule
+  input_format: entity_mask
+  prompt: s_sep_o
+  batch_size: 32
+  max_seq_len: 256
   train_split: train
   valid_split: validation
-  batch_size: 32
   shuffle: true
-  revision: 69b6010fe9681567b98f9d3d3c70487079183d4b
+  revision: a6a27f7e03c79cee2ee1171b7001d7a23cfd4495
   num_workers: 0
-  k_fold:
-    enabled: false
-    k: 5
 optimizer:
   type: AdamW
   lr: 2.e-5
   weight_decay: 0.01
-  adam_beta2: 0.999
-  amsgrad: true
+  adam_beta2: 0.98
 loss:
   type: FocalLoss
-  bce: false
-  beta: 0.5
+  focal_alpha: 0.25
+  focal_gamma: 2
+  dice_smooth: 1.5
 lr_scheduler:
   type: StepLR
   warmup_steps: 500
@@ -56,7 +58,7 @@ wandb:
 sweep_config:
   method: bayes
   metric:
-    name: val_pearson
+    name: micro f1 score
     goal: maximize
   parameters:
     lr:
@@ -90,3 +92,4 @@ sweep_config:
     optimizer:
       values:
       - AdamW
+...
