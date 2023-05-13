@@ -42,17 +42,17 @@ def alert_wandb(config, run_name, title):
 
 
 def to_hangul(sent):
-        dic = {
-            "ORG" : "조직",
-            "PER" : "사람",
-            "DAT" : "시간",
-            "LOC" : "장소",
-            "POH" : "기타",
-            "NOH" : "수량",
-        }
-        
-        sub = eval(sent['subject_entity'])
-        obj = eval(sent['object_entity'])
+    dic = {
+        "ORG" : "조직",
+        "PER" : "사람",
+        "DAT" : "시간",
+        "LOC" : "장소",
+        "POH" : "기타",
+        "NOH" : "수량",
+    }
+    
+    sub = eval(sent['subject_entity'])
+    obj = eval(sent['object_entity'])
 
     sub['type'] = dic[sub['type']]
     obj['type'] = dic[obj['type']]

@@ -39,7 +39,6 @@ class FocalLoss(nn.Module):
 
 class LovaszSoftmaxLoss(nn.Module):
     def __init__(self, weight=None, reduction: str = 'mean'):
-    def __init__(self, weight=None, reduction: str = 'mean'):
         super(LovaszSoftmaxLoss, self).__init__()
         self.weight = weight
         self.reduction = reduction
@@ -68,7 +67,6 @@ class LovaszSoftmaxLoss(nn.Module):
         return torch.stack(losses)
 
     def forward(self, inputs: Tensor, targets: Tensor):
-    def forward(self, inputs: Tensor, targets: Tensor):
         log_probs = F.log_softmax(inputs, dim=1)
         lovasz_loss = self.lovasz_softmax(log_probs, targets)
 
@@ -82,12 +80,10 @@ class LovaszSoftmaxLoss(nn.Module):
 
 class MulticlassDiceLoss(nn.Module):
     def __init__(self, smooth: float = 1e-5, reduction: str = 'mean'):
-    def __init__(self, smooth: float = 1e-5, reduction: str = 'mean'):
         super(MulticlassDiceLoss, self).__init__()
         self.smooth = smooth
         self.reduction = reduction
 
-    def forward(self, inputs: Tensor, targets: Tensor):
     def forward(self, inputs: Tensor, targets: Tensor):
         # Softmax over the inputs
         inputs = torch.softmax(inputs, dim=1)
