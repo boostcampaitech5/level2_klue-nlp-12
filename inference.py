@@ -74,7 +74,7 @@ def main():
     input_format = config.dataloader.get('input_format')
     prompt = config.dataloader.get('prompt')
 
-    test_id, test_dataset, test_label, num_added_tokens = load_test_dataset(
+    test_id, test_dataset, test_label = load_test_dataset(
         split='test',
         revision=revision,
         tokenizer=tokenizer,
@@ -88,7 +88,7 @@ def main():
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
     #   BaseREModel, BiLSTMREModel, BiGRUREModel
-    model = model_class(config, tokenizer.vocab_size + num_added_tokens)
+    model = model_class(config, len(tokenizer))
 
     load_model_path = './best_model/pytorch_model.bin'
     checkpoint = torch.load(load_model_path)
