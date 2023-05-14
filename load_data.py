@@ -133,7 +133,7 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             return_tensors='pt',
             padding=True,
             truncation=True,
-            max_length=256,
+            max_length=180,
             add_special_tokens=True,
         )
             
@@ -143,7 +143,7 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             return_tensors='pt',
             padding=True,
             truncation=True,
-            max_length=256,
+            max_length=180,
             add_special_tokens=True,
         )
 
