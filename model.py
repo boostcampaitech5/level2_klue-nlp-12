@@ -1,15 +1,16 @@
 import torch.nn as nn
-from torch.cuda.amp import autocast
+# from torch.cuda.amp import autocast
 from transformers import (
     AutoConfig,
     AutoModel,
+    AutoModelForSequenceClassification,
 )
 
 from loss import *
 
 
 class BaseREModel(nn.Module):
-    def __init__(self, config, vocab_size: int):
+    def __init__(self, config, new_num_tokens: int):
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
@@ -17,11 +18,16 @@ class BaseREModel(nn.Module):
         
         self.plm = AutoModel.from_pretrained(config.model['name'],
                                              config=self.model_config)
-        self.plm.resize_token_embeddings(vocab_size)
+        # self.plm = AutoModelForSequenceClassification.from_pretrained(config.model['name'],
+        #                                                               config=self.model_config
+
+        if self.model_config.vocab_size != new_num_tokens:
+            self.plm.resize_token_embeddings(new_num_tokens)
+
         self.classifier = nn.Linear(self.plm.config.hidden_size, config.num_labels)
         
 
-    @autocast()
+    # @autocast()
     def forward(
         self,
         input_ids=None,
@@ -34,13 +40,14 @@ class BaseREModel(nn.Module):
                            attention_mask=attention_mask)
         pooler_output = outputs.pooler_output
         logits = self.classifier(pooler_output)
+        # logits = outputs['logits']
         return {
             'logits': logits,
         }
 
 
 class BiGRUREModel(nn.Module):
-    def __init__(self, config, vocab_size: int):
+    def __init__(self, config, new_num_tokens: int):
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
@@ -48,7 +55,9 @@ class BiGRUREModel(nn.Module):
 
         self.plm = AutoModel.from_pretrained(config.model['name'],
                                              config=self.model_config)
-        self.plm.resize_token_embeddings(vocab_size)
+
+        if self.model_config.vocab_size != new_num_tokens:
+            self.plm.resize_token_embeddings(new_num_tokens)
 
         self.hidden_size = self.model_config.hidden_size  # 1024 for roberta-large
         # TODO: implement initialization of gru, classifier
