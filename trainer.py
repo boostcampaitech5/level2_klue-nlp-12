@@ -18,16 +18,19 @@ class RETrainer(Trainer):
             self._past= outputs[self.args.past_index]
 
         # 커스텀 loss 정의
-        loss_module = __import__('loss', fromlist=[self.loss_cfg['type']])
-        loss_class = getattr(loss_module, self.loss_cfg['type'])
-        if self.loss_cfg['type'] == 'CrossEntropyLoss' or self.loss_cfg['type'] == 'LovaszSoftmaxLoss':
-            loss_fct = loss_class()
-        elif self.loss_cfg['type'] == 'FocalLoss':
-            loss_fct = loss_class(self.loss_cfg['focal_alpha'], self.loss_cfg['focal_gamma'])
-        elif self.loss_cfg['type'] == 'MulticlassDiceLoss':
-            loss_fct = loss_class(self.loss_cfg['dice_smooth'])
+        if self.loss_cfg['type'] == 'CrossEntropyLoss':
+            loss_fct = torch.nn.functional.cross_entropy
         else:
-            raise ValueError('Unsupported loss type')
+            loss_module = __import__('loss', fromlist=[self.loss_cfg['type']])
+            loss_class = getattr(loss_module, self.loss_cfg['type'])
+            if self.loss_cfg['type'] == 'LovaszSoftmaxLoss':
+                loss_fct = loss_class()
+            elif self.loss_cfg['type'] == 'FocalLoss':
+                loss_fct = loss_class(self.loss_cfg['focal_alpha'], self.loss_cfg['focal_gamma'])
+            elif self.loss_cfg['type'] == 'MulticlassDiceLoss':
+                loss_fct = loss_class(self.loss_cfg['dice_smooth'])
+            else:
+                raise ValueError('Unsupported loss type')
 
         # Check the type of outputs and extract logits
         logits = outputs['logits'] if isinstance(outputs, dict) else outputs[0]
