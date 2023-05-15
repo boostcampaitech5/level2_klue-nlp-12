@@ -98,6 +98,8 @@ class BiLSTMREModel(nn.Module):
                             num_layers=1,
                             batch_first=True,  # (bsz, seq, feature) if True else (seq, bsz, feature)
                             bidirectional=True)
+        self.gelu = nn.GELU()
+        self.dropout = nn.Dropout(0.1)
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
 
     def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
@@ -106,7 +108,8 @@ class BiLSTMREModel(nn.Module):
                            attention_mask=attention_mask).last_hidden_state
         _, (next_hidden, _) = self.lstm(outputs)
         outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
-        #print(next_hidden[0].shape, next_hidden[1].shape)
+        outputs = self.gelu(outputs)
+        outputs = self.dropout(outputs)
         logits = self.classifier(outputs)
         return {
             'logits': logits,
