@@ -21,3 +21,4 @@ run_exps.sh
 TAPT/
 train*.py
 *.ipynb
+inference*.py
