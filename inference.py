@@ -73,8 +73,8 @@ def main():
     model_module = __import__('model', fromlist=[config.model['variant']])
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
-    #   REBaseModel, REBiLSTMModel, REBiGRUModel
-    model = model_class(config, tokenizer.vocab_size)
+    #   BaseREModel, BiLSTMREModel, BiGRUREModel
+    model = model_class(config, len(tokenizer))
 
     load_model_path = './best_model/pytorch_model.bin'
     checkpoint = torch.load(load_model_path)
