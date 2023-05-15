@@ -26,6 +26,30 @@ class FocalLoss(nn.Module):
             return focal_loss
 
 
+class WeightedFocalLoss(nn.Module):
+    def __init__(self, alpha: torch.Tensor = None, gamma: float = 2.0, reduction: str = 'mean') -> None:
+        super(WeightedFocalLoss, self).__init__()
+        self.alpha = alpha   # 각 클래스에 대한 가중치
+        self.gamma = gamma   # "focus" 매개변수로 어려운 예시에 더 많은 주의를 기울이는 역할
+        self.reduction = reduction
+
+        # alpha가 None인 경우, 모든 클래스에 동일한 가중치 적용
+        # alpha가 텐서인 경우, alpha의 각 요소는 해당 클래스의 가중치로 설정
+        self.ce_loss = nn.CrossEntropyLoss(weight=self.alpha, reduction='none')
+
+    def forward(self, inputs: Tensor, targets: Tensor):
+        ce_loss = self.ce_loss(inputs, targets)
+        pt = torch.exp(-ce_loss)
+        focal_loss = (1 - pt)**self.gamma * ce_loss
+
+        if self.reduction == 'mean':
+            return torch.mean(focal_loss)
+        elif self.reduction == 'sum':
+            return torch.sum(focal_loss)
+        else:
+            return focal_loss
+
+
 class LovaszSoftmaxLoss(nn.Module):
     def __init__(self, weight=None, reduction: str = 'mean'):
         super(LovaszSoftmaxLoss, self).__init__()
