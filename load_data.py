@@ -15,7 +15,7 @@ def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=Non
         input_format = 'default'
     if prompt is None:
         prompt = 'default'
-    print('input format: ',input_format, 'prompt: ', prompt)
+    print('input format: ',input_format, '| prompt: ', prompt)
 
     dataset = load_dataset(
         'Smoked-Salmon-s/RE_Competition',
@@ -25,10 +25,10 @@ def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=Non
     )
     pd_dataset = dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({'id': 'int64'})
     train_dataset = preprocessing_dataset(pd_dataset, input_format, type_transform)
-    tokenized_train, num_added_tokens = tokenized_dataset(train_dataset, tokenizer, input_format, prompt)
+    tokenized_train = tokenized_dataset(train_dataset, tokenizer, input_format, prompt)
     train_label = pd_dataset['label'].values
 
-    return tokenized_train, train_label, num_added_tokens
+    return tokenized_train, train_label
 
 
 def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None, type_transform=False):
@@ -48,7 +48,7 @@ def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None
     )
     pd_dataset = dataset.to_pandas().iloc[1:].reset_index(drop=True).astype({'id': 'int64'})
     test_dataset = preprocessing_dataset(pd_dataset, input_format, type_transform)
-    tokenized_test, _ = tokenized_dataset(test_dataset, tokenizer, input_format, prompt)
+    tokenized_test = tokenized_dataset(test_dataset, tokenizer, input_format, prompt)
     
     if split == 'test':
         test_label = list(map(int, pd_dataset['label'].values))
@@ -108,8 +108,12 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
         special_tokens = ['<S:PER>', '<S:ORG>', '<O:PER>', '<O:ORG>', '<O:LOC>', '<O:DAT>', '<O:POH>', '<O:NOH>',
                         '</S:PER>', '</S:ORG>', '</O:PER>', '</O:ORG>', '</O:LOC>', '</O:DAT>', '</O:POH>', '</O:NOH>']
     
-    tokenizer.add_tokens(special_tokens)
-    num_added_tokens = len(special_tokens)
+    tokenizer.add_special_tokens({'additional_special_tokens': special_tokens})
+
+    # check
+    print("length of tokenizer:", len(tokenizer))
+    print("length of special tokens: ", tokenizer.all_special_tokens)
+    print("special tokens:", tokenizer.special_tokens_map)
 
     # prompt 추가
     if prompt in ['s_sep_o', 's_and_o']:
@@ -150,7 +154,7 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
     else:
         raise ValueError('잘못된 prompt가 입력되었습니다. ')
 
-    return tokenized_sentences, num_added_tokens
+    return tokenized_sentences
 
 
 def label_to_num(label):
