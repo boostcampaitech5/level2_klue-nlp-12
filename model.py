@@ -10,17 +10,16 @@ from loss import *
 
 
 class REBaseModel(nn.Module):
-    def __init__(self, config, vocab_size: int):
+    def __init__(self, config, new_num_tokens: int):
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
         self.model_config.num_labels = config.num_labels
         
-        self.plm = AutoModel.from_pretrained(config.model['name'],
-                                             config=self.model_config)
-        self.plm.resize_token_embeddings(vocab_size)
-        self.classifier = nn.Linear(self.plm.config.hidden_size, config.num_labels)
-        
+        self.plm = AutoModelForSequenceClassification.from_pretrained(config.model['name'],
+                                                                      config=self.model_config)
+        if self.model_config.vocab_size != new_num_tokens:
+            self.plm.resize_token_embeddings(new_num_tokens)
 
     @autocast()
     def forward(
@@ -33,8 +32,7 @@ class REBaseModel(nn.Module):
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask)
-        pooler_output = outputs.pooler_output
-        logits = self.classifier(pooler_output)
+        logits = outputs['logits']
         return {
             'logits': logits,
         }
