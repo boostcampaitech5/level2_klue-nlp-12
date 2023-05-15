@@ -32,7 +32,7 @@ def train(config):
     prompt = config.dataloader.get('prompt')
     type_transform = config.dataloader.get('type_transform')
 
-    train_dataset, train_raw_label, num_added_tokens = load_train_dataset(
+    train_dataset, train_raw_label = load_train_dataset(
         split=config.dataloader['train_split'],
         revision=revision,
         tokenizer=tokenizer,
@@ -55,7 +55,7 @@ def train(config):
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
     #   REBaseModel, REBiLSTMModel, REBiGRUModel
-    model = model_class(config, tokenizer.vocab_size + num_added_tokens)
+    model = model_class(config, len(tokenizer))
 
     print(model.model_config)
 
