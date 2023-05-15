@@ -15,7 +15,7 @@ class BaseREModel(nn.Module):
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
         self.model_config.num_labels = config.num_labels
-        
+
         self.plm = AutoModelForSequenceClassification.from_pretrained(config.model['name'],
                                                                       config=self.model_config)
 
@@ -57,11 +57,14 @@ class BiGRUREModel(nn.Module):
         self.gru = nn.GRU(input_size=self.hidden_size,
                           hidden_size=self.hidden_size,
                           num_layers=1,
+                          dropout=0.1,
                           batch_first=True,  # (bsz, seq, feature) if True else (seq, bsz, feature)
                           bidirectional=True)
+        self.bn = nn.BatchNorm1d(self.hidden_size * 2)
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(0.1)
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
+        nn.init.kaiming_normal_(self.classifier.weight, mode='fan_in', nonlinearity='relu')
 
     def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
         outputs = self.plm(input_ids=input_ids,
@@ -69,7 +72,7 @@ class BiGRUREModel(nn.Module):
                            attention_mask=attention_mask).last_hidden_state
         _, next_hidden = self.gru(outputs)
         outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
-        print(next_hidden[0].shape, next_hidden[1].shape)
+        outputs = self.bn(outputs)
         outputs = self.gelu(outputs)
         outputs = self.dropout(outputs)
         logits = self.classifier(outputs)
@@ -96,11 +99,14 @@ class BiLSTMREModel(nn.Module):
         self.lstm = nn.LSTM(input_size=self.hidden_size,
                             hidden_size=self.hidden_size,
                             num_layers=1,
+                            dropout=0.1,
                             batch_first=True,  # (bsz, seq, feature) if True else (seq, bsz, feature)
                             bidirectional=True)
+        self.bn = nn.BatchNorm1d(self.hidden_size * 2)
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(0.1)
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
+        nn.init.kaiming_normal_(self.classifier.weight, mode='fan_in', nonlinearity='relu')
 
     def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
         outputs = self.plm(input_ids=input_ids,
@@ -108,6 +114,7 @@ class BiLSTMREModel(nn.Module):
                            attention_mask=attention_mask).last_hidden_state
         _, (next_hidden, _) = self.lstm(outputs)
         outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
+        outputs = self.bn(outputs)
         outputs = self.gelu(outputs)
         outputs = self.dropout(outputs)
         logits = self.classifier(outputs)
