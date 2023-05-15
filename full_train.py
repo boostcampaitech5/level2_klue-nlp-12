@@ -1,5 +1,6 @@
 import sys
 import pickle as pickle
+import pytz
 from datetime import datetime
 
 import torch
@@ -86,8 +87,7 @@ def train(config):
         # 로깅 설정
         logging_dir=config.trainer['logging_dir'],  # 로그 저장 디렉토리
         logging_steps=config.trainer['logging_steps'],  # 로그 저장 스텝
-
-        load_best_model_at_end=False,
+        load_best_model_at_end=config.trainer['use_early_stop'],
     )
 
     # 7. trainer 설정
@@ -113,8 +113,8 @@ def main():
         config_path = './config.yaml'
     config = parse_arguments(config_path)
 
-    now = datetime.now()
-    run_name = f'{config.run_name}_{now}'
+    now = datetime.now(pytz.timezone('Asia/Seoul'))
+    run_name = f'{config.run_name}_{now.strftime("%d-%H-%M")}'
 
     init_wandb(config, run_name)
     train(config)

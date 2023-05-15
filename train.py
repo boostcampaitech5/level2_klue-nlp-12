@@ -108,7 +108,7 @@ def train(config):
         # 평가 설정
         evaluation_strategy=config.trainer['evaluation_strategy'],  # 훈련 중 평가 전략
         eval_steps=config.trainer['evaluation_steps'],  # 평가 스텝
-        load_best_model_at_end=True,
+        load_best_model_at_end=config.trainer['use_early_stop'],
     )
 
     # 7. trainer 설정
