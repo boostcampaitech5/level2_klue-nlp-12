@@ -100,14 +100,14 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
     
     if input_format == 'entity_mask':
         special_tokens = ['[SUBJ-ORG]', '[SUBJ-PER]', '[OBJ-ORG]', '[OBJ-PER]', '[OBJ-LOC]', '[OBJ-DAT]', '[OBJ-POH]', '[OBJ-NOH]']
-    
+
     elif input_format == 'entity_marker':
         special_tokens = ['[E1]', '[/E1]', '[E2]', '[/E2]']
-    
+
     elif input_format == 'typed_entity_marker':
         special_tokens = ['<S:PER>', '<S:ORG>', '<O:PER>', '<O:ORG>', '<O:LOC>', '<O:DAT>', '<O:POH>', '<O:NOH>',
                         '</S:PER>', '</S:ORG>', '</O:PER>', '</O:ORG>', '</O:LOC>', '</O:DAT>', '</O:POH>', '</O:NOH>']
-    
+
     tokenizer.add_special_tokens({'additional_special_tokens': special_tokens})
 
     # check

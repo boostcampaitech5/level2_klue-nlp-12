@@ -1,20 +1,9 @@
 from typing import Optional
 
-from typing import Optional
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-
-
-class CrossEntropyLoss(nn.Module):
-    def __init__(self, reduction: str = 'mean') -> None:
-        super().__init__()
-        self.reduction = reduction
-
-    def forward(self, inputs: Tensor, targets: Tensor) -> Tensor:
-        return F.cross_entropy(inputs, targets, reduction=self.reduction)
 
 
 class FocalLoss(nn.Module):

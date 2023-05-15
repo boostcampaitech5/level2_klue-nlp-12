@@ -147,4 +147,3 @@ def marker(sent, input_format):
     sentence = re.sub(r'\s+', ' ', sentence)
 
     return sentence
-

@@ -65,7 +65,7 @@ def train(config):
     model_module = __import__('model', fromlist=[config.model['variant']])
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
-    #   REBaseModel, REBiLSTMModel, REBiGRUModel
+    #   BaseREModel, BiLSTMREModel, BiGRUREModel
     model = model_class(config, len(tokenizer))
 
     print(model.model_config)

@@ -1,10 +1,6 @@
-import pickle
-import random
-
-import torch
-import sklearn
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score
+import sklearn
+from sklearn.metrics import accuracy_score
 
 
 def klue_re_micro_f1(preds, labels):
