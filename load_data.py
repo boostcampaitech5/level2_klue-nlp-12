@@ -116,23 +116,29 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
     print("special tokens:", tokenizer.special_tokens_map)
 
     # prompt 추가
-    if prompt in ['s_sep_o', 's_and_o']:
-        concat_entity = []
+    if prompt in ['s_sep_o', 's_and_o', 'quiz']:
+        prompt_forward = []
 
         if prompt == 's_sep_o':
             for e01, e02 in zip(dataset['subj_entity'], dataset['obj_entity']):
                 temp = ''
                 temp = e01[2:-1] + '[SEP]' + e02[2:-1]
-                concat_entity.append(temp)
+                prompt_forward.append(temp)
 
         elif prompt == 's_and_o':
             for e01, e02 in zip(dataset['subj_entity'], dataset['obj_entity']):
                 temp = ''
                 temp = e01[2:-1] + '와 ' + e02[2:-1] + '의 관계'
-                concat_entity.append(temp)
+                prompt_forward.append(temp)
+        
+        elif prompt == 'quiz':
+            for e01, e02 in zip(dataset['subj_entity'], dataset['obj_entity']):
+                temp = ''
+                temp = '다음 문장에서 ' + e01[2:-1] + '와 ' + e02[2:-1] + '사이의 관계를 추출하시오.'
+                prompt_forward.append(temp)       
 
         tokenized_sentences = tokenizer(
-            concat_entity,
+            prompt_forward,
             list(dataset['sentence']),
             return_tensors='pt',
             padding=True,
@@ -140,6 +146,29 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             max_length=180,
             add_special_tokens=True,
         )
+    
+    elif prompt == 'problem':
+        prompt_forward = []
+        prompt_backward = []
+
+        for e01, e02 in zip(dataset['subj_entity'], dataset['obj_entity']):
+            temp = ''
+            temp = '다음 문장에서 ' + e01[2:-1] + '와 ' + e02[2:-1] + '사이의 관계를 추출하시오.'
+            prompt_forward.append(temp)
+        for e00, e01, e02 in zip(dataset['sentence'], dataset['subj_entity'], dataset['obj_entity']):
+            temp = ''
+            temp = e00 + e01[2:-1] + '와 ' + e02[2:-1] + '는 어떤 관계입니까?'
+            prompt_backward.append(temp)  
+
+        tokenized_sentences = tokenizer(
+            prompt_forward,
+            prompt_backward,
+            return_tensors='pt',
+            padding=True,
+            truncation=True,
+            max_length=180,
+            add_special_tokens=True,
+        )  
             
     elif prompt == 'default':
         tokenized_sentences = tokenizer(
