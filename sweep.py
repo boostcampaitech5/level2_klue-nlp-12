@@ -24,9 +24,6 @@ from typing import Any
 def main(config) -> None:
 
     def sweep_train(config: Any = config) -> None:
-        
-        print(config.wandb)
-        return
 
         wandb.init(
             entity=config.wandb['entity'],
