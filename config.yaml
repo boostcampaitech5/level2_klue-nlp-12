@@ -6,7 +6,7 @@ use_wandb: false
 num_labels: 30
 model:
   name: klue/roberta-large
-  variant: REBaseModel
+  variant: BiLSTMREModel
 dataloader:
   type: REDataModule
   input_format: entity_mask
@@ -52,7 +52,7 @@ trainer:
   save_strategy: steps
 wandb:
   entity: salmons
-  project_name: klue-re
+  project_name: sweep_test
   sweep_project_name: sweep
   sweep_count: 10
 sweep_config:
@@ -61,35 +61,43 @@ sweep_config:
     name: micro f1 score
     goal: maximize
   parameters:
+    input_format:
+      values:
+      - default
+      - entity_mask
+      - entity_marker
+      - entity_marker_punct
+      - typed_entity_marker
+      - typed_entity_marker_punct
+    prompt:
+      values:
+      - default
+      - s_sep_o
+      - s_and_o
+      - quiz
+      - problem
+    type_transform:
+      values:
+      - true
+      - false
     lr:
       values:
-      - 3.0e-06
-      - 5.0e-06
-      - 7.0e-06
       - 1.0e-05
       - 2.0e-05
       - 3.0e-05
       - 5.0e-05
     epochs:
       values:
-      - 4
       - 5
-      - 6
-      - 7
     batch_size:
       values:
-      - 16
-    loss_function:
+      - 64
+    adam_beta2:
       values:
-      - SmoothL1Loss
-    beta:
+      - 0.98
+      - 0.999
+    warmup_ratio:
       values:
+      - 0.06
       - 0.1
-      - 0.5
-      - 1
-      - 2
-      - 5
-    optimizer:
-      values:
-      - AdamW
 ...
