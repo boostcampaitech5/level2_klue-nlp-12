@@ -20,6 +20,8 @@ class RETrainer(Trainer):
         # 커스텀 loss 정의
         if self.loss_cfg['type'] == 'CrossEntropyLoss':
             loss_fct = torch.nn.functional.cross_entropy
+        elif self.loss_cfg['type'] == 'WeightedCrossEntropyLoss':
+            loss_fct = torch.nn.CrossEntropyLoss(weight = torch.Tensor(self.loss_cfg['weights']).to(device))
         else:
             loss_module = __import__('loss', fromlist=[self.loss_cfg['type']])
             loss_class = getattr(loss_module, self.loss_cfg['type'])
@@ -27,6 +29,8 @@ class RETrainer(Trainer):
                 loss_fct = loss_class()
             elif self.loss_cfg['type'] == 'FocalLoss':
                 loss_fct = loss_class(self.loss_cfg['focal_alpha'], self.loss_cfg['focal_gamma'])
+            elif self.loss_cfg['type'] == 'WeightedFocalLoss':
+                loss_fct = loss_class(alpha = torch.Tensor(self.loss_cfg['weight_focal_alpha']).to(device), gamma= self.loss_cfg['focal_gamma'])
             elif self.loss_cfg['type'] == 'MulticlassDiceLoss':
                 loss_fct = loss_class(self.loss_cfg['dice_smooth'])
             else:
