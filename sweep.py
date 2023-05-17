@@ -23,14 +23,12 @@ from typing import Any
 
 def main(config) -> None:
 
-    def sweep_train(config: Any = config) -> None:
+    def sweep_train(config: Any = config) -> None:   
 
         wandb.init(
             entity=config.wandb['entity'],
-            project=config.wandb['project_name'],
-            #name=run_name,
-            #config=config,
-        )   
+            project=config.wandb['sweep_project_name']
+        )
 
         sweep_config = wandb.config
 
@@ -44,9 +42,9 @@ def main(config) -> None:
         # 2. preprocess dataset
         # 3. tokenize dataset
         revision = config.dataloader['revision']
-        input_format = config.dataloader.get('input_format')
-        prompt = config.dataloader.get('prompt')
-        type_transform = config.dataloader.get('type_transform')
+        input_format = sweep_config['input_format']
+        prompt = sweep_config['prompt']
+        type_transform = sweep_config['type_transform']
 
         train_dataset, train_raw_label = load_train_dataset(
             split=config.dataloader['train_split'],
@@ -101,14 +99,14 @@ def main(config) -> None:
             num_train_epochs=sweep_config['epochs'],  # 전체 훈련 epoch 수
             learning_rate=sweep_config['lr'],  # learning rate
             weight_decay=config.optimizer['weight_decay'],  # weight decay
-            adam_beta2=config.optimizer['adam_beta2'],  # AdamW 옵티마이저의 beta2 하이퍼파라미터
+            adam_beta2=sweep_config['adam_beta2'],  # AdamW 옵티마이저의 beta2 하이퍼파라미터
 
             # 배치 사이즈 설정
             per_device_train_batch_size=sweep_config['batch_size'],  # 훈련 중 장치 당 batch size
             per_device_eval_batch_size=sweep_config['batch_size'],  # 평가 중 장치 당 batch size
 
             # 스케줄링 설정
-            warmup_ratio=config.lr_scheduler['warmup_ratio'],  # learning rate scheduler의 warmup 비율
+            warmup_ratio=sweep_config['warmup_ratio'],  # learning rate scheduler의 warmup 비율
             # warmup_steps=config.lr_scheduler['warmup_steps'],  # number of warmup steps for learning rate scheduler
 
             # 로깅 설정
@@ -135,7 +133,7 @@ def main(config) -> None:
             eval_dataset=re_dev_dataset,  # evaluation dataset
             compute_metrics=compute_metrics,  # define metrics function
             # callbacks=([WandbCallback()] if config.use_wandb else []),
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer['early_stop'])],
+            # callbacks=[EarlyStoppingCallback(early_stopping_patience=config.trainer['early_stop'])],
             loss_cfg=config.loss,
         )
 
@@ -144,6 +142,7 @@ def main(config) -> None:
         # 10. save model
         trainer.save_model(config.trainer['model_dir'])
 
+    
     
     sweep_id = wandb.sweep(
         sweep=config.sweep_config
