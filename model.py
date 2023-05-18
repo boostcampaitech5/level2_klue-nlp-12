@@ -106,7 +106,6 @@ class BiLSTMREModel(nn.Module):
                             batch_first=True,  # (bsz, seq, feature) if True else (seq, bsz, feature)
                             bidirectional=True)
         self.init_lstm()
-        self.gelu = nn.GELU()
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
         nn.init.kaiming_normal_(self.classifier.weight, mode='fan_in', nonlinearity='relu')
         self.classifier.bias.data.fill_(0)
@@ -126,7 +125,6 @@ class BiLSTMREModel(nn.Module):
                            attention_mask=attention_mask).last_hidden_state
         _, (next_hidden, _) = self.lstm(outputs)
         outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
-        outputs = self.gelu(outputs)
         logits = self.classifier(outputs)
         return {
             'logits': logits,

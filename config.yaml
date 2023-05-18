@@ -61,35 +61,41 @@ sweep_config:
     name: micro f1 score
     goal: maximize
   parameters:
+    input_format:
+      values:
+      - default
+      - entity_marker
+      - entity_marker_punct
+      - typed_entity_marker
+      - typed_entity_marker_punct
+    prompt:
+      values:
+      - default
+      - s_sep_o
+      - s_and_o
+      - quiz
+      - problem
+    type_transform:
+      values:
+      - true
+      - false
     lr:
       values:
-      - 3.0e-06
-      - 5.0e-06
-      - 7.0e-06
       - 1.0e-05
       - 2.0e-05
       - 3.0e-05
       - 5.0e-05
     epochs:
       values:
+      - 3
       - 4
       - 5
-      - 6
-      - 7
-    batch_size:
+    adam_beta2:
       values:
-      - 16
-    loss_function:
+      - 0.98
+      - 0.999
+    warmup_ratio:
       values:
-      - SmoothL1Loss
-    beta:
-      values:
+      - 0.06
       - 0.1
-      - 0.5
-      - 1
-      - 2
-      - 5
-    optimizer:
-      values:
-      - AdamW
-...
+... 
