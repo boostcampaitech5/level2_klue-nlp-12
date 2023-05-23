@@ -10,7 +10,13 @@ from model.loss import *
 
 
 class BaseREModel(nn.Module):
+    """Pre-trained Language Model로부터 나온 logits를 FC layer에 통과시키는 기본 분류기."""
     def __init__(self, config, new_num_tokens: int):
+        """
+        Args:
+            config: 사용자 config.
+            new_num_tokens: tokenizer의 길이. Additional special tokens 수를 포함.
+        """
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
@@ -23,13 +29,7 @@ class BaseREModel(nn.Module):
             self.plm.resize_token_embeddings(new_num_tokens)
 
     @autocast()
-    def forward(
-        self,
-        input_ids=None,
-        token_type_ids=None,
-        attention_mask=None,
-        labels=None,
-    ):
+    def forward(self, input_ids=None, token_type_ids=None, attention_mask=None, labels=None):
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask)
@@ -40,7 +40,16 @@ class BaseREModel(nn.Module):
 
 
 class BiGRUREModel(nn.Module):
+    """
+    Pre-trained Language Model로부터 나온 logits를 Bi-driectional GRU에 통과시킨 후
+    hidden states 정보를 FC layer에 통과시킨 분류기.
+    """
     def __init__(self, config, new_num_tokens: int):
+        """
+        Args:
+            config: 사용자 config.
+            new_num_tokens: tokenizer의 길이. Additional special tokens 수를 포함.
+        """
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
@@ -59,7 +68,6 @@ class BiGRUREModel(nn.Module):
                           batch_first=True,  # (bsz, seq, feature) if True else (seq, bsz, feature)
                           bidirectional=True)
         self.init_gru()
-        self.gelu = nn.GELU()
         self.classifier = nn.Linear(self.hidden_size * 2, config.num_labels)
         nn.init.kaiming_normal_(self.classifier.weight, mode='fan_in', nonlinearity='relu')
         self.classifier.bias.data.fill_(0)
@@ -73,13 +81,13 @@ class BiGRUREModel(nn.Module):
             elif 'bias' in name:
                 param.data.fill_(0)
 
-    def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
+    @autocast()
+    def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask: Tensor, labels=None):
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask).last_hidden_state
         _, next_hidden = self.gru(outputs)
         outputs = torch.cat([next_hidden[0], next_hidden[1]], dim=1)
-        outputs = self.gelu(outputs)
         logits = self.classifier(outputs)
         return {
             'logits': logits,
@@ -87,7 +95,15 @@ class BiGRUREModel(nn.Module):
 
 
 class BiLSTMREModel(nn.Module):
+    """Pre-trained Language Model로부터 나온 logits를 Bi-driectional LSTM에 통과시킨 후
+    hidden states 정보를 FC layer에 통과시킨 분류기.
+    """
     def __init__(self, config, new_num_tokens: int):
+        """
+        Args:
+            config: 사용자 config.
+            new_num_tokens: tokenizer의 길이. Additional special tokens 수를 포함.
+        """
         super().__init__()
 
         self.model_config = AutoConfig.from_pretrained(config.model['name'])
@@ -119,7 +135,8 @@ class BiLSTMREModel(nn.Module):
             elif 'bias' in name:
                 param.data.fill_(0)
 
-    def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask, labels=None):
+    @autocast()
+    def forward(self, input_ids: Tensor, token_type_ids: Tensor, attention_mask: Tensor, labels=None):
         outputs = self.plm(input_ids=input_ids,
                            token_type_ids=token_type_ids,
                            attention_mask=attention_mask).last_hidden_state
