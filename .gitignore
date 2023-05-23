@@ -15,6 +15,7 @@ EDA/
 EDA.ipynb
 config*.yaml
 !config.yaml
+!config_full.yaml
 output*.log
 nohup*.out
 run_exps.sh

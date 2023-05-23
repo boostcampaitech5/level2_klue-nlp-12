@@ -5,7 +5,7 @@ import torch
 from datasets import load_dataset
 from tqdm import tqdm
 
-from utils import *
+from utils.utils import *
 
 
 def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=None, type_transform=False):
@@ -190,7 +190,7 @@ def label_to_num(label):
     """원본 문자열 label을 숫자 형식 class로 변환."""
 
     num_label = []
-    with open('dict_label_to_num.pkl', 'rb') as f:
+    with open('load_data/dict_label_to_num.pkl', 'rb') as f:
         dict_label_to_num = pickle.load(f)
     for v in label:
         num_label.append(dict_label_to_num[v])
@@ -202,7 +202,7 @@ def num_to_label(label):
     """숫자 형식 class를 원본 문자열 label로 변환."""
 
     origin_label = []
-    with open('dict_num_to_label.pkl', 'rb') as f:
+    with open('load_data/dict_num_to_label.pkl', 'rb') as f:
         dict_num_to_label = pickle.load(f)
     for v in label:
         origin_label.append(dict_num_to_label[v])

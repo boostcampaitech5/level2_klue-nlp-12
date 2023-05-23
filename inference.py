@@ -9,10 +9,10 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from args import *
-from load_data import *
-from model import *
-from utils import *
+from utils.args import *
+from load_data.load_data import *
+from model.model import *
+from utils.utils import *
 
 
 def inference(model, tokenized_sent, device: torch.device):
@@ -70,7 +70,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # load my model
-    model_module = __import__('model', fromlist=[config.model['variant']])
+    model_module = __import__('model.model', fromlist=[config.model['variant']])
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
     #   BaseREModel, BiLSTMREModel, BiGRUREModel

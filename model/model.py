@@ -6,7 +6,7 @@ from transformers import (
     AutoModelForSequenceClassification,
 )
 
-from loss import *
+from model.loss import *
 
 
 class BaseREModel(nn.Module):

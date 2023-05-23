@@ -10,12 +10,12 @@ from transformers import (
     TrainingArguments,
 )
 
-from args import *
-from load_data import *
-from model import *
-from metric import *
-from trainer import *
-from utils import *
+from utils.args import *
+from load_data.load_data import *
+from model.model import *
+from model.metric import *
+from trainer.trainer import *
+from utils.utils import *
 
 
 def train(config):
@@ -62,7 +62,7 @@ def train(config):
 
     # 5. import model
     # setting model hyperparameter
-    model_module = __import__('model', fromlist=[config.model['variant']])
+    model_module = __import__('model.model', fromlist=[config.model['variant']])
     model_class = getattr(model_module, config.model['variant'])
     # Available customized classes:
     #   BaseREModel, BiLSTMREModel, BiGRUREModel

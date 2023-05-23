@@ -1,0 +1,102 @@
+---
+run_name: exp-name
+n_gpu: 1
+seed: 42
+use_wandb: true
+num_labels: 30
+model:
+  name: klue/roberta-large
+  variant: BiLSTMREModel
+dataloader:
+  type: REDataModule
+  input_format: typed_entity_marker_punct
+  prompt: s_and_o
+  type_transform: false
+  train_split: train
+  valid_split: validation
+  batch_size: 64
+  shuffle: true
+  revision: a6a27f7e03c79cee2ee1171b7001d7a23cfd4495
+  num_workers: 0
+optimizer:
+  type: AdamW
+  lr: 2.0e-5
+  weight_decay: 0.01
+  adam_beta2: 0.98
+loss:
+  type: CrossEntropyLoss
+  focal_alpha: 0.25
+  focal_gamma: 2.0
+  dice_smooth: 1.5
+lr_scheduler:
+  type: StepLR
+  warmup_steps: 500
+  warmup_ratio: 0.06
+  step_size: 50
+  gamma: 0.1
+  is_schedule: false
+trainer:
+  epochs: 5
+  output_dir: saved/models/
+  model_dir: ./best_model
+  pred_dir: ./prediction/submission.csv
+  val_pred_dir: ./prediction/validation_output.csv
+  logging_dir: ./logs
+  logging_steps: 100
+  save_total_limit: 5
+  save_steps: 500
+  save_freq: 1
+  use_early_stop: false
+  early_stop: 3
+  evaluation_strategy: steps
+  evaluation_steps: 500
+  save_strategy: steps
+wandb:
+  entity: salmons
+  project_name: klue-re
+  sweep_project_name: sweep
+  sweep_count: 10
+sweep_config:
+  method: bayes
+  metric:
+    name: eval/micro f1 score
+    goal: maximize
+  parameters:
+    input_format:
+      values:
+      - default
+      - entity_marker
+      - entity_marker_punct
+      - typed_entity_marker
+      - typed_entity_marker_punct
+    prompt:
+      values:
+      - default
+      - s_sep_o
+      - s_and_o
+      - quiz
+      - problem
+    type_transform:
+      values:
+      - true
+      - false
+    lr:
+      values:
+      - 1.0e-05
+      - 2.0e-05
+      - 3.0e-05
+      - 5.0e-05
+    epochs:
+      values:
+      - 3
+      - 4
+      - 5
+    adam_beta2:
+      values:
+      - 0.98
+      - 0.999
+    warmup_ratio:
+      values:
+      - 0.06
+      - 0.1
+... 
