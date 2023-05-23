@@ -16,8 +16,8 @@ boostcamp AI Tech 5 NLP 트랙 레벨2 프로젝트
 
 
 ## 프로젝트 보고서 및 발표 시각 자료 Report and Presentation
-[Wrap-Up Report](https://github.com/boostcampaitech5/level2_klue-nlp-12/blob/docs/%2330-refactor/documents/wrap%20up%20report.pdf)
-[Presentation](https://github.com/boostcampaitech5/level2_klue-nlp-12/blob/docs/%2330-refactor/documents/presentation.pdf)
+- [Wrap-Up Report](https://github.com/boostcampaitech5/level2_klue-nlp-12/blob/docs/%2330-refactor/documents/wrap%20up%20report.pdf)  
+- [Presentation](https://github.com/boostcampaitech5/level2_klue-nlp-12/blob/docs/%2330-refactor/documents/presentation.pdf)
 
 
 ## 프로젝트 개요 Project Overview
