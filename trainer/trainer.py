@@ -3,7 +3,7 @@ from transformers import Trainer
 
 
 class RETrainer(Trainer):
-    def __init__(self, *args, loss_cfg=None, **kwargs):
+    def __init__(self, loss_cfg=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.loss_cfg = loss_cfg
 
@@ -12,6 +12,7 @@ class RETrainer(Trainer):
         
         labels = inputs.pop('labels')
         outputs = model(**inputs)
+        logits = outputs['logits'] if isinstance(outputs, dict) else outputs[0]
 
         # 인덱스에 맞춰서 과거 ouput을 다 저장
         if self.args.past_index >= 0:
@@ -21,7 +22,7 @@ class RETrainer(Trainer):
         if self.loss_cfg['type'] == 'CrossEntropyLoss':
             loss_fct = torch.nn.functional.cross_entropy
         elif self.loss_cfg['type'] == 'WeightedCrossEntropyLoss':
-            loss_fct = torch.nn.CrossEntropyLoss(weight = torch.Tensor(self.loss_cfg['weights']).to(device))
+            loss_fct = torch.nn.CrossEntropyLoss(weight=torch.Tensor(self.loss_cfg['weights']).to(device))
         else:
             loss_module = __import__('model.loss', fromlist=[self.loss_cfg['type']])
             loss_class = getattr(loss_module, self.loss_cfg['type'])
@@ -35,9 +36,6 @@ class RETrainer(Trainer):
                 loss_fct = loss_class(self.loss_cfg['dice_smooth'])
             else:
                 raise ValueError('Unsupported loss type')
-
-        # Check the type of outputs and extract logits
-        logits = outputs['logits'] if isinstance(outputs, dict) else outputs[0]
 
         loss = loss_fct(logits, labels).to(device)
         return (loss, outputs) if return_outputs else loss
