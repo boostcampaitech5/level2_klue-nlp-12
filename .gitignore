@@ -11,6 +11,7 @@ saved/
 wandb/
 configs/
 EDA/
+!eda/
 
 EDA.ipynb
 config*.yaml
