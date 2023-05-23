@@ -11,14 +11,15 @@ saved/
 wandb/
 configs/
 EDA/
+!eda/
 
 EDA.ipynb
 config*.yaml
 !config.yaml
+!config_full.yaml
 output*.log
 nohup*.out
 run_exps.sh
 TAPT/
-train*.py
 *.ipynb
 inference*.py
