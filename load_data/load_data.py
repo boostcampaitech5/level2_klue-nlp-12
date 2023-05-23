@@ -2,15 +2,38 @@ import pickle as pickle
 import re
 
 import torch
-from datasets import load_dataset
+from datasets import Dataset, load_dataset
+from transformers import PreTrainedTokenizer
 from tqdm import tqdm
+from typing import Dict, List, Tuple, Union
 
 from utils.utils import *
 
 
-def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=None, type_transform=False):
-    """train dataset을 불러온 후, tokenizing 합니다."""
+def load_train_dataset(
+    split: str,
+    revision: str,
+    tokenizer: PreTrainedTokenizer,
+    input_format: str = None,
+    prompt: str = None,
+    type_transform: bool = False
+) -> Tuple[Dict[str, Union[List[str], List[int]]], Union[int, List[str]]]:
+    """
+    train dataset을 불러온 후, tokenizing 하는 함수입니다.
 
+    Args:
+        split (str): 데이터셋의 분할 유형 (train, validation, test).
+        revision (str): 데이터셋의 버전 (commit hash).
+        tokenizer (PreTrainedTokenizer): 사용할 토크나이저 객체.
+        input_format (str, optional): entity representation 유형. 기본값은 None이며, default로 설정됩니다.
+        prompt (str, optional): prompt 유형. 기본값은 None이며, default로 설정됩니다.
+        type_transform (bool, optional): entity type을 한글로 번역할지 여부. 기본값은 False입니다.
+
+    Returns:
+        Tuple[Dict[str, Union[List[str], List[int]]], Union[int, List[str]]]
+        : 토큰화된 train 데이터셋과 레이블.
+    """
+    
     if input_format is None:
         input_format = 'default'
     if prompt is None:
@@ -31,8 +54,29 @@ def load_train_dataset(split, revision, tokenizer, input_format=None, prompt=Non
     return tokenized_train, train_label
 
 
-def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None, type_transform=False):
-    """test dataset을 불러온 후, tokenizing 합니다."""
+def load_test_dataset(
+    split: str,
+    revision: str,
+    tokenizer: PreTrainedTokenizer,
+    input_format: str = None,
+    prompt: str = None,
+    type_transform: bool = False
+) -> Tuple[Union[int, str], Dict[str, Union[List[str], List[int]]], Union[int, List[str]]]:
+    """
+    test dataset을 불러온 후, tokenizing 하는 함수입니다.
+
+    Args:
+        split (str): 데이터셋의 분할 유형 (train, validation, test).
+        revision (str): 데이터셋의 버전 (commit hash).
+        tokenizer (PreTrainedTokenizer): 사용할 토크나이저 객체.
+        input_format (str, optional): entity representation 유형. 기본값은 None이며, default로 설정됩니다.
+        prompt (str, optional): prompt 유형. 기본값은 None이며, default로 설정됩니다.
+        type_transform (bool, optional): entity type을 한글로 번역할지 여부. 기본값은 False입니다.
+
+    Returns:
+        Tuple[Union[int, str], Dict[str, Union[List[str], List[int]]], Union[int, List[str]]]
+        : test 데이터셋의 id, 토큰화된 문장, 레이블.
+    """
 
     if input_format is None:
         input_format = 'default'
@@ -58,10 +102,24 @@ def load_test_dataset(split, revision, tokenizer, input_format=None, prompt=None
     return test_dataset['id'], tokenized_test, test_label
 
 
-def preprocessing_dataset(dataset, input_format, type_transform=False):
-    """subject_entity column과 object_entity column을 리스트 형태로 변환하고, 
-        sentence column에 marker를 적용합니다."""
-    
+def preprocessing_dataset(
+    dataset: Dict[str, List[str]],
+    input_format: str,
+    type_transform: bool = False
+) -> Dict[str, List[str]]:
+    """
+    subject_entity column과 object_entity column을 리스트 형태로 변환하고, 
+    sentence column에 entity representation를 적용하는 함수입니다.
+
+    Args:
+        dataset (Dict[str, List[str]]): 전처리할 데이터셋.
+        input_format (str): entity representation 유형.
+        type_transform (bool, optional): entity type을 한글로 번역할지 여부. 기본값은 False입니다.
+
+    Returns:
+        Dict[str, List[str]]: 전처리된 데이터셋.
+    """
+
     subject_entity = []
     object_entity = []
 
@@ -81,6 +139,7 @@ def preprocessing_dataset(dataset, input_format, type_transform=False):
         dataset['subject_entity'] = [x[0] for x in hanguled]
         dataset['object_entity'] = [x[1] for x in hanguled]
 
+    # entity representation 적용
     input_format_list = ['entity_mask', 'entity_marker', 'entity_marker_punct', 'typed_entity_marker', 'typed_entity_marker_punct']
     if input_format in input_format_list:
         marked_sentences = [marker(row_data, input_format) for index, row_data in tqdm(dataset.iterrows())]
@@ -93,8 +152,25 @@ def preprocessing_dataset(dataset, input_format, type_transform=False):
     return dataset
 
 
-def tokenized_dataset(dataset, tokenizer, input_format, prompt):
-    """tokenizer에 따라 sentence를 tokenizing 합니다."""
+def tokenized_dataset(
+    dataset: Dict[str, List[str]],
+    tokenizer: PreTrainedTokenizer,
+    input_format: str,
+    prompt: str
+) -> Dict[str, Union[List[str], List[int]]]:
+    """
+    tokenizer에 따라 문장을 토큰화하는 함수입니다.
+
+    Args:
+        dataset (Dict[str, List[str]]): 토큰화할 데이터셋.
+        tokenizer (PreTrainedTokenizer): 사용할 토크나이저 객체.
+        input_format (str): entity representation 유형.
+        prompt (str): prompt 유형.
+
+    Returns:
+        Dict[str, Union[List[str], List[int]]]: 토큰화된 문장의 딕셔너리.
+    """
+
     # 새로운 특수 토큰 추가
     special_tokens = []
     
@@ -166,7 +242,7 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
             return_tensors='pt',
             padding=True,
             truncation=True,
-            max_length=180,
+            max_length=200,
             add_special_tokens=True,
         )  
             
@@ -186,8 +262,16 @@ def tokenized_dataset(dataset, tokenizer, input_format, prompt):
     return tokenized_sentences
 
 
-def label_to_num(label):
-    """원본 문자열 label을 숫자 형식 class로 변환."""
+def label_to_num(label: List[str]) -> List[int]:
+    """
+    원본 문자열 label을 숫자 형식 클래스로 변환하는 함수입니다.
+    
+    Args:
+        label (List[str]): 변환할 원본 문자열 클래스 리스트.
+        
+    Returns:
+        List[int]: 숫자 형식으로 변환된 클래스 리스트.
+    """
 
     num_label = []
     with open('load_data/dict_label_to_num.pkl', 'rb') as f:
@@ -198,8 +282,16 @@ def label_to_num(label):
     return num_label
 
 
-def num_to_label(label):
-    """숫자 형식 class를 원본 문자열 label로 변환."""
+def num_to_label(label: List[int]) -> List[str]:
+    """
+    숫자 형식 클래스를 원본 문자열 label로 변환하는 함수입니다.
+    
+    Args:
+        label (List[int]): 변환할 숫자 형식의 클래스 리스트.
+        
+    Returns:
+        List[str]: 원본 문자열로 변환된 클래스 리스트.
+    """
 
     origin_label = []
     with open('load_data/dict_num_to_label.pkl', 'rb') as f:
@@ -211,7 +303,7 @@ def num_to_label(label):
 
 
 class REDataset(torch.utils.data.Dataset):
-    """Dataset 구성을 위한 class."""
+    """Dataset 구성을 위한 class입니다."""
 
     def __init__(self, pair_dataset, labels):
         self.pair_dataset = pair_dataset
