@@ -21,5 +21,6 @@ nohup*.out
 run_exps.sh
 TAPT/
 train*.py
+!trainer.py
 *.ipynb
 inference*.py
