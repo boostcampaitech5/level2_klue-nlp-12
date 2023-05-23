@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
+from typing import Tuple, List
 
 from utils.args import *
 from load_data.load_data import *
@@ -15,10 +16,17 @@ from model.model import *
 from utils.utils import *
 
 
-def inference(model, tokenized_sent, device: torch.device):
+def inference(model: torch.nn.Module, tokenized_sent: DataLoader, device: torch.device) -> Tuple[List[int], List[List[float]]]:
     """
-    test dataset을 DataLoader로 만들어 준 후,
-    batch_size로 나눠 model이 예측 합니다.
+    test dataset을 DataLoader로 만들어 준 후 batch_size로 나눠 model이 예측
+
+    Args:
+        model (torch.nn.Module): 예측에 사용할 모델
+        tokenized_sent (DataLoader): 토큰화가 완료된 문장 데이터셋
+        device (torch.device): 모델을 실행할 디바이스 (예: cuda:0)
+
+    Returns:
+        Tuple[List[int], List[List[float]]]: 예측된 클래스 인덱스와 각 클래스에 대한 확률이 담긴 리스트를 반환
     """
 
     dataloader = DataLoader(tokenized_sent, batch_size=32, shuffle=False)
@@ -49,9 +57,23 @@ def inference(model, tokenized_sent, device: torch.device):
     )
 
 
-def main():
+def main() -> None:
     """
-    주어진 dataset csv 파일과 같은 형태일 경우 inference 가능한 코드입니다.
+    주어진 데이터셋 csv 파일과 같은 형태일 경우 inference를 수행할 수 있는 메인 함수
+
+    다음 프로세스를 수행:
+        1. config에 따라 시드를 고정하고, 디바이스를 설정
+        2. 토크나이저와 모델을 로드하고, 학습시킨 모델을 로드
+        3. 테스트 데이터셋을 로드하고, 데이터셋 객체 생성
+        4. 모델을 이용하여 예측 수행
+        5. 예측 결과를 csv 파일로 저장
+        6. full train이 아닐 경우 검증 데이터셋에 대해서도 같은 과정을 수행
+
+    Args:
+        None
+
+    Returns:
+        None
     """
 
     try:
