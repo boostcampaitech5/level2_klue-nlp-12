@@ -24,9 +24,23 @@ from typing import Any
 
 
 def main(config: Namespace) -> None:
+    """
+    Sweep 초기화 및 Wandb sweep agent 선언
 
+    Args:
+        config(Namespace): 모델 학습에 필요한 hyperparameter를 포함하는 딕셔너리 
+    Returns:
+        None
+    """
     def sweep_train(config: Namespace = config) -> None:   
+        """
+        Sweep agent 선언시 function에 전달되는 함수
 
+        Args:
+            config(Namespace): 모델 학습에 필요한 hyperparmeter를 포함하는 딕셔너리
+        Returns:
+            None
+        """
         wandb.init(
             entity=config.wandb['entity'],
             project=config.wandb['sweep_project_name']
