@@ -3,6 +3,7 @@ import os
 import re
 import random
 from argparse import Namespace
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -41,7 +42,7 @@ def alert_wandb(config: Namespace, run_name: str, title: str) -> None:
         wandb.alert(title=title, level=AlertLevel.INFO, text=f'{run_name}')
 
 
-def to_hangul(sent) -> tuple[str, str]:
+def to_hangul(sent) -> Tuple[str, str]:
     """
     entity명을 한글로 변경
     """
