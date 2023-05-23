@@ -2,6 +2,8 @@ import sys
 import pickle as pickle
 import pytz
 from datetime import datetime
+from typing import Dict
+from omegaconf import DictConfig
 
 import torch
 from transformers import (
@@ -18,7 +20,24 @@ from trainer.trainer import *
 from utils.utils import *
 
 
-def train(config):
+def train(config: DictConfig) -> None:  
+    """
+    모델을 학습하는 함수
+    
+    다음 프로세스를 수행:
+        1. 데이터셋을 불러오고 전처리 및 토큰화
+        2. 레이블을 숫자 형태로 변환
+        3. 학습 및 개발 데이터셋에 대한 Dataset 객체를 생성
+        4. 지정된 모델을 불러와 훈련 인자 설정
+        5. 모델 학습 후 저장
+
+    Args:
+        config (dict): 모델 학습에 필요한 모든 구성 매개변수를 포함하는 딕셔너리
+                       dataloader, model, optimizer, trainer 구성 포함
+
+    Returns:
+        None
+    """
     seed_everything(config.seed)
     
     # load model and tokenizer
@@ -130,7 +149,22 @@ def train(config):
     trainer.save_model(config.trainer['model_dir'])
 
 
-def main():
+def main() -> None:
+    """
+    config를 불러오고 학습 프로세스를 시작하는 메인 함수입니다.
+    
+    다음 프로세스를 수행:
+        1. 제공된 YAML 파일에서 구성을 파싱하거나 기본 파일을 사용
+        2. 제공된 구성으로 Weights & Biases (wandb) 실행 초기화
+        3. train 함수를 호출하여 모델 훈련 프로세스를 시작
+        4. 학습 완료 후 wandb에 완료 메세지 송출
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     try:
         config_path = sys.argv[1]
     except IndexError:
