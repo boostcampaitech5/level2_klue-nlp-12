@@ -57,7 +57,7 @@ def inference(model: torch.nn.Module, tokenized_sent: DataLoader, device: torch.
     )
 
 
-def main():
+def main() -> None:
     """
     주어진 데이터셋 csv 파일과 같은 형태일 경우 inference를 수행할 수 있는 메인 함수
 

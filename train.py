@@ -2,8 +2,7 @@ import sys
 import pickle as pickle
 import pytz
 from datetime import datetime
-from typing import Dict
-from omegaconf import DictConfig
+from typing import Dict, Any
 
 import torch
 from transformers import (
@@ -20,7 +19,7 @@ from trainer.trainer import *
 from utils.utils import *
 
 
-def train(config: DictConfig) -> None:  
+def train(config: Any) -> None:  
     """
     모델을 학습하는 함수
     
