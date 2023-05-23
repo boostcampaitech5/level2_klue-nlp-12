@@ -2,7 +2,7 @@ import yaml
 from argparse import Namespace
 
 
-def parse_arguments(config_path:str) -> Namespace:
+def parse_arguments(config_path: str) -> Namespace:
     """config.json 파일의 내용을 argparse.Namespace 객체로 변환.
 
     Returns:

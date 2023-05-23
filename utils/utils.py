@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import random
+from argparse import Namespace
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -10,8 +12,7 @@ from wandb import AlertLevel
 
 log = logging.getLogger(__name__)
 
-
-def seed_everything(seed, workers: bool = False) -> int:
+def seed_everything(seed: int, workers: bool = False) -> int:
     log.info(f"Global seed set to {seed}")
     os.environ["PL_GLOBAL_SEED"] = str(seed)
     random.seed(seed)
@@ -23,7 +24,7 @@ def seed_everything(seed, workers: bool = False) -> int:
     return seed
 
 
-def init_wandb(config, run_name):
+def init_wandb(config: Namespace, run_name: str) -> None:
     if not config.use_wandb:
         return
 
@@ -36,12 +37,15 @@ def init_wandb(config, run_name):
     wandb.alert(title='start', level=AlertLevel.INFO, text=f'{run_name}')
 
 
-def alert_wandb(config, run_name, title):
+def alert_wandb(config: Namespace, run_name: str, title: str) -> None:
     if config.use_wandb:
         wandb.alert(title=title, level=AlertLevel.INFO, text=f'{run_name}')
 
 
-def to_hangul(sent):
+def to_hangul(sent) -> Tuple[str, str]:
+    """
+    entity명을 한글로 변경
+    """
     dic = {
         "ORG" : "조직",
         "PER" : "사람",
@@ -63,9 +67,9 @@ def to_hangul(sent):
     return sent['subject_entity'], sent['object_entity']
 
 
-
-def marker(sent, input_format):
+def marker(sent, input_format: str) -> str:
     """dataframe에서 하나의 row 내의 정보들을 조합해 마킹한 sentence를 만드는 함수"""
+
     # str 타입에서 dict 뽑아내기 
     sub = eval(sent['subject_entity'])
     obj = eval(sent['object_entity'])
@@ -142,6 +146,7 @@ def marker(sent, input_format):
                 lst.append(new_obj)
             else:
                 lst.append(i)
+
     # 최종 sentence로 만들고 공백 처리하기
     sentence = ''.join(str(item) if isinstance(item, str) else ''.join(item) for item in lst)
     sentence = re.sub(r'\s+', ' ', sentence)
