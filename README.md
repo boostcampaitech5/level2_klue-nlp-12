@@ -21,8 +21,7 @@ boostcamp AI Tech 5 NLP 트랙 레벨2 프로젝트
 
 
 ## 프로젝트 개요 Project Overview
-![프로젝트개요](https://github.com/boostcampaitech5/level2_klue-nlp-12/assets/97666193/1927eb3c-4abc-4715-a86c-6e3fd8ff5a27)
-
+<img src="https://github.com/boostcampaitech5/level2_klue-nlp-12/assets/97666193/0cf91f64-9302-4028-a3ea-43e8c35de3c8" width="1000" height="500"/>
 
 ## 레포지토리 구조 Repository Structure
 ```bash
@@ -47,27 +46,33 @@ level2_klue-nlp-12/
 │   ├── args.py                 // 프로그램 실행 시 전달되는 인자들을 처리하기 위한 파일
 │   └── utils.py
 │
+├── documents                   // 보고서 및 발표자료
+│   └── wrap up report.pdf
+│   └── presentation.pdf
+│
 ├── requirements.txt            // 프로젝트에 필요한 라이브러리들을 명시
 │
 ├── train.py                    // 모델 학습 시작을 위한 메인 스크립트
 ├── full_train.py               // 전체 데이터로의 모델 학습 시작을 위한 메인 스크립트
 ├── inference.py                // 학습된 모델의 평가 및 추론을 위한 스크립트
+├── sweep.py                    // sweep 동작을 위한 스크립트
 │
 ├── config.yaml                 // 모델 학습 설정 관리를 위한 YAML
 ├── config_full.yaml            // 전체 데이터로의 모델 학습 설정 관리를 위한 YAML
 │
-├── run_exps_default.sh         // 실험 자동화를 위한 쉘 스크립트
-└── pyproject.toml              // Black 설정 파일 
+├── run.sh                      // 실험 자동화를 위한 쉘 스크립트
+├── pyproject.toml              // Black 설정 파일 
+│
+└── README.md
 ```
 
 ## 데이터 Data
 - train.csv: 총 32470개
 - test_data.csv: 총 7765개
-- label
-![label](https://github.com/boostcampaitech5/level2_klue-nlp-12/assets/97666193/b66c13db-5126-4287-b798-52bae0fe3aec)
 
 
 ## 사용법 Usage
+- 모델 학습 및 추론 위해서는, [Huggingface Datasets](https://huggingface.co/datasets/Smoked-Salmon-s/RE_Competition) 로그인 및 access token 인증이 선행되어야 합니다. 
 - 환경 설치
 ```bash
 pip install -r requirement.txt
